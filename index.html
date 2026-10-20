@@ -1,0 +1,2333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f6fb0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0c1420" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="生理学学习">
+<meta name="format-detection" content="telephone=no">
+<meta name="description" content="生理学每日学习助手移动离线版：123 天知识点计划，今日任务、答题、制卡、统计，数据本机保存。">
+<title>生理学每日学习助手 · 移动版</title>
+<style>
+/* 生理学每日学习助手 · 移动版 —— 移动端优先样式，无任何外部依赖 */
+:root {
+  --accent: #2f6fb0;
+  --accent-strong: #23578f;
+  --accent-soft: rgba(47, 111, 176, 0.10);
+  --accent-line: rgba(47, 111, 176, 0.26);
+
+  --bg: #f4f7fc;
+  --surface: #ffffff;
+  --surface-2: #eef2fa;
+  --text: #17253f;
+  --muted: #5b6b86;
+  --line: #e2e8f3;
+
+  --ok: #2f9e6a;
+  --ok-soft: rgba(47, 158, 106, 0.12);
+  --warn: #b9761a;
+  --warn-soft: rgba(185, 118, 26, 0.13);
+  --danger: #bf4238;
+  --danger-soft: rgba(191, 66, 56, 0.12);
+
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 2px 12px rgba(18, 70, 80, 0.06);
+  --shadow-lift: 0 6px 20px rgba(18, 70, 80, 0.10);
+
+  --fs-body: 16px;
+  --fs-title: 22px;
+  --fs-h2: 18px;
+  --fs-sm: 14px;
+  --fs-xs: 12.5px;
+  --lh: 1.65;
+  --tap: 44px;
+  --tabbar-h: 58px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --accent: #6fa8e8;
+    --accent-strong: #93c2f5;
+    --accent-soft: rgba(111, 168, 232, 0.16);
+    --accent-line: rgba(111, 168, 232, 0.34);
+
+    --bg: #0c1420;
+    --surface: #141d2c;
+    --surface-2: #1b2637;
+    --text: #e4ecf8;
+    --muted: #9fb0c9;
+    --line: #26344a;
+
+    --ok: #4fbf8b;
+    --ok-soft: rgba(79, 191, 139, 0.16);
+    --warn: #dda14d;
+    --warn-soft: rgba(221, 161, 77, 0.16);
+    --danger: #e0705f;
+    --danger-soft: rgba(224, 112, 95, 0.16);
+
+    --shadow: 0 2px 12px rgba(4, 10, 24, 0.42);
+    --shadow-lift: 0 6px 20px rgba(4, 10, 24, 0.52);
+  }
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
+               "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  font-size: var(--fs-body);
+  line-height: var(--lh);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, textarea, select { font-family: inherit; font-size: var(--fs-body); color: inherit; }
+button { cursor: pointer; border: none; background: none; }
+a { color: var(--accent); }
+
+.wrap {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 14px 14px 0;
+}
+
+/* ---------- 顶部 ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 20;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: saturate(150%) blur(10px);
+  -webkit-backdrop-filter: saturate(150%) blur(10px);
+  border-bottom: 1px solid var(--line);
+  padding-top: env(safe-area-inset-top);
+}
+@supports not (background: color-mix(in srgb, red 50%, blue)) {
+  .topbar { background: var(--bg); }
+}
+.topbar-inner {
+  max-width: 680px; margin: 0 auto;
+  padding: 10px 14px 8px;
+  display: flex; align-items: center; gap: 10px;
+}
+.brand { display: flex; flex-direction: column; min-width: 0; }
+.brand h1 {
+  margin: 0; font-size: var(--fs-title); font-weight: 700; letter-spacing: .2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.brand .sub { font-size: var(--fs-xs); color: var(--muted); }
+.topbar .spacer { flex: 1; }
+
+.icon-btn {
+  width: var(--tap); height: var(--tap);
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 12px; color: var(--muted);
+}
+.icon-btn:active { background: var(--surface-2); }
+
+/* ---------- 视图 ---------- */
+.view { display: none; padding-bottom: calc(var(--tabbar-h) + 34px + env(safe-area-inset-bottom)); }
+.view.active { display: block; animation: fadeUp .22s ease both; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------- 卡片 ---------- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  margin: 0 0 14px;
+}
+.card.tight { padding: 13px 14px; }
+.card-head {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 10px;
+}
+.card-head h2 {
+  margin: 0; font-size: var(--fs-h2); font-weight: 650;
+}
+.card-head .count { font-size: var(--fs-sm); color: var(--muted); font-weight: 400; }
+.card-head .grow { flex: 1; }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px; border-radius: 999px;
+  font-size: var(--fs-xs); line-height: 1.6;
+  background: var(--accent-soft); color: var(--accent-strong);
+  border: 1px solid var(--accent-line);
+  white-space: nowrap;
+}
+.chip.ok { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
+.chip.warn { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
+.chip.danger { background: var(--danger-soft); color: var(--danger); border-color: transparent; }
+.chip.plain { background: var(--surface-2); color: var(--muted); border-color: transparent; }
+
+.k-title { font-size: 19px; font-weight: 700; line-height: 1.45; margin: 8px 0 4px; }
+.k-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 2px; }
+
+.field { padding: 11px 0; border-top: 1px dashed var(--line); }
+.field:first-of-type { border-top: none; }
+.field .label {
+  font-size: var(--fs-xs); color: var(--muted);
+  letter-spacing: .4px; margin-bottom: 3px;
+}
+.field .value { font-size: var(--fs-body); word-break: break-word; overflow-wrap: anywhere; }
+.field .value.mono { font-variant-numeric: tabular-nums; }
+
+.task-list { margin: 4px 0 0; padding: 0; list-style: none; counter-reset: t; }
+.task-list li {
+  position: relative; padding: 5px 0 5px 26px; font-size: var(--fs-body);
+  counter-increment: t;
+}
+.task-list li::before {
+  content: counter(t); position: absolute; left: 0; top: 5px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--accent-soft); color: var(--accent-strong);
+  font-size: 11px; line-height: 18px; text-align: center; font-weight: 600;
+}
+
+/* ---------- 勾选项 ---------- */
+.check-row {
+  display: flex; align-items: flex-start; gap: 11px;
+  min-height: var(--tap); padding: 8px 0;
+  border-top: 1px dashed var(--line);
+}
+.check-row:first-of-type { border-top: none; }
+.check-row .box {
+  flex: 0 0 auto; width: 24px; height: 24px; margin-top: 2px;
+  border: 1.8px solid var(--line); border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: transparent; transition: all .18s ease;
+  background: var(--surface);
+}
+.check-row .box svg { width: 15px; height: 15px; }
+.check-row.done .box { background: var(--accent); border-color: var(--accent); color: #fff; }
+.check-row .body { flex: 1; min-width: 0; }
+.check-row .t1 { font-size: var(--fs-body); transition: color .18s ease; }
+.check-row.done .t1 { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line); }
+.check-row .t2 { font-size: var(--fs-xs); color: var(--muted); margin-top: 2px; word-break: break-word; }
+
+/* ---------- 按钮 ---------- */
+.btn {
+  min-height: var(--tap); padding: 0 18px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  border-radius: 12px; font-size: var(--fs-body); font-weight: 600;
+  background: var(--surface-2); color: var(--text);
+  transition: transform .12s ease, background .18s ease, opacity .18s ease;
+  border: 1px solid transparent;
+}
+.btn:active { transform: scale(.975); }
+.btn.primary { background: var(--accent); color: #fff; box-shadow: var(--shadow); }
+.btn.primary:active { background: var(--accent-strong); }
+.btn.ghost { background: transparent; border-color: var(--line); color: var(--text); }
+.btn.block { width: 100%; }
+.btn[disabled] { opacity: .45; pointer-events: none; }
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-row > .btn { flex: 1 1 0; }
+
+/* ---------- 日期切换 ---------- */
+.datebar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.datebar .day { flex: 1; text-align: center; min-width: 0; }
+.datebar .day .d1 { font-size: var(--fs-body); font-weight: 650; }
+.datebar .day .d2 { font-size: var(--fs-xs); color: var(--muted); }
+.datebar input[type="date"] {
+  width: 100%; min-height: var(--tap);
+  padding: 8px 10px; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--surface);
+  text-align: center;
+}
+
+/* ---------- 答题 ---------- */
+.quiz-progress {
+  height: 6px; border-radius: 999px; background: var(--surface-2);
+  overflow: hidden; margin: 2px 0 12px;
+}
+.quiz-progress > i {
+  display: block; height: 100%; width: 0;
+  background: var(--accent); border-radius: 999px;
+  transition: width .25s ease;
+}
+.quiz-stats { display: flex; gap: 8px; flex-wrap: wrap; font-size: var(--fs-sm); color: var(--muted); }
+.quiz-stats b { color: var(--text); font-variant-numeric: tabular-nums; }
+
+.flashcard {
+  position: relative; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 20px; box-shadow: var(--shadow); padding: 20px 18px;
+  min-height: 240px; display: flex; flex-direction: column; margin-bottom: 14px;
+  animation: fadeUp .2s ease both;
+}
+.flashcard .fc-label { font-size: var(--fs-xs); color: var(--muted); letter-spacing: .5px; }
+.flashcard .fc-front { font-size: 20px; font-weight: 650; line-height: 1.5; margin: 8px 0 0; word-break: break-word; }
+.flashcard .fc-back {
+  margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line);
+  font-size: var(--fs-body); line-height: 1.7; white-space: pre-wrap; word-break: break-word;
+  animation: fadeUp .2s ease both;
+}
+.flashcard .fc-tip {
+  margin-top: auto; padding-top: 16px; text-align: center;
+  font-size: var(--fs-sm); color: var(--muted);
+}
+.flashcard .fc-chapter { margin-top: 10px; font-size: var(--fs-xs); color: var(--muted); }
+
+.rate-row { display: flex; gap: 8px; margin-top: 4px; }
+.rate-row .btn { flex: 1 1 0; padding: 0 8px; font-size: var(--fs-body); flex-direction: column; gap: 1px; min-height: 58px; }
+.rate-row .btn small { font-size: var(--fs-xs); font-weight: 400; opacity: .78; }
+.rate-row .btn.again { background: var(--danger-soft); color: var(--danger); }
+.rate-row .btn.vague { background: var(--warn-soft); color: var(--warn); }
+.rate-row .btn.good { background: var(--ok-soft); color: var(--ok); }
+.rate-row .btn:active { transform: scale(.97); }
+
+/* ---------- 表单 ---------- */
+.form-row { margin-bottom: 12px; }
+.form-row label { display: block; font-size: var(--fs-sm); color: var(--muted); margin-bottom: 6px; }
+.input, textarea.input {
+  width: 100%; min-height: var(--tap);
+  padding: 11px 12px; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--surface);
+  font-size: var(--fs-body); line-height: 1.5;
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+.input:focus, textarea.input:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+textarea.input { min-height: 96px; resize: vertical; }
+.hint { font-size: var(--fs-xs); color: var(--muted); margin-top: 6px; }
+
+.notice {
+  border-radius: 12px; padding: 11px 13px; font-size: var(--fs-sm);
+  background: var(--warn-soft); color: var(--warn); margin-bottom: 12px;
+  display: flex; gap: 8px; align-items: flex-start;
+}
+.notice.err { background: var(--danger-soft); color: var(--danger); }
+.notice.ok { background: var(--ok-soft); color: var(--ok); }
+
+/* ---------- 统计 ---------- */
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.tile {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 13px 14px; box-shadow: var(--shadow);
+}
+.tile .k { font-size: var(--fs-xs); color: var(--muted); }
+.tile .v { font-size: 24px; font-weight: 700; line-height: 1.25; font-variant-numeric: tabular-nums; }
+.tile .v small { font-size: var(--fs-sm); font-weight: 500; color: var(--muted); margin-left: 2px; }
+
+.rank { counter-reset: r; margin: 0; padding: 0; list-style: none; }
+.rank li {
+  counter-increment: r; position: relative;
+  padding: 10px 0 10px 30px; border-top: 1px dashed var(--line);
+  font-size: var(--fs-sm); word-break: break-word;
+}
+.rank li:first-child { border-top: none; }
+.rank li::before {
+  content: counter(r); position: absolute; left: 0; top: 11px;
+  width: 20px; height: 20px; border-radius: 6px; text-align: center;
+  font-size: 11px; line-height: 20px; font-weight: 700;
+  background: var(--surface-2); color: var(--muted);
+}
+.rank li .n { font-size: var(--fs-xs); color: var(--danger); margin-left: 6px; }
+
+.heat { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.heat .cell {
+  aspect-ratio: 1 / 1; border-radius: 6px; background: var(--surface-2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: var(--muted);
+}
+.heat .cell.l1 { background: var(--accent-soft); color: var(--accent-strong); }
+.heat .cell.l2 { background: var(--accent-line); color: var(--text); }
+.heat .cell.l3 { background: var(--accent); color: #fff; }
+.heat .cell.today { outline: 2px solid var(--accent); outline-offset: 1px; }
+.heat-legend { display: flex; align-items: center; gap: 6px; font-size: var(--fs-xs); color: var(--muted); margin-top: 8px; }
+.heat-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+/* ---------- 底部标签栏 ---------- */
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: saturate(160%) blur(12px);
+  -webkit-backdrop-filter: saturate(160%) blur(12px);
+  border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+@supports not (background: color-mix(in srgb, red 50%, blue)) {
+  .tabbar { background: var(--surface); }
+}
+.tabbar-inner {
+  max-width: 680px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  height: var(--tabbar-h);
+}
+.tab {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  color: var(--muted); font-size: 11.5px; min-height: var(--tap);
+  transition: color .18s ease;
+}
+.tab svg { width: 21px; height: 21px; }
+.tab.active { color: var(--accent); }
+.tab.active svg { stroke-width: 2.1; }
+
+
+/* ---------- 学习材料 / 阅读层 ---------- */
+.m-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.m-chips .chip { min-height: 34px; padding: 4px 13px; cursor: pointer; }
+.m-chips .chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.m-item {
+  display: block; background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 14px 15px; margin: 0 0 12px; cursor: pointer;
+  transition: transform .12s ease, border-color .18s ease;
+}
+.m-item:active { transform: scale(.99); border-color: var(--accent-line); }
+.m-item.read { background: var(--surface-2); }
+.m-item .m-row { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 6px; }
+.m-item .m-date { font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; }
+.m-item .m-title { font-size: 17px; font-weight: 650; line-height: 1.45; margin-bottom: 4px; word-break: break-word; }
+.m-item .m-sub { font-size: var(--fs-xs); color: var(--muted); line-height: 1.55; word-break: break-word; }
+.m-item.read .m-title { color: var(--muted); }
+
+.material-entry .me-top { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+.material-entry .me-badge { font-size: var(--fs-xs); color: var(--accent-strong); background: var(--accent-soft); border-radius: 999px; padding: 2px 9px; }
+.material-entry .me-title { font-size: 18px; font-weight: 650; line-height: 1.45; margin: 0 0 5px; word-break: break-word; }
+.material-entry .me-sub { font-size: var(--fs-sm); color: var(--muted); line-height: 1.6; margin: 0 0 12px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+.reader {
+  position: fixed; inset: 0; z-index: 80; display: none;
+  background: var(--bg); flex-direction: column;
+}
+.reader.show { display: flex; }
+body.reader-open { overflow: hidden; }
+.reader-head {
+  flex: 0 0 auto; background: var(--surface); border-bottom: 1px solid var(--line);
+  padding-top: env(safe-area-inset-top);
+}
+.reader-head-inner { max-width: 680px; margin: 0 auto; padding: 9px 14px 11px; }
+.r-h-row { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.r-h-title { font-size: 20px; font-weight: 700; line-height: 1.42; margin: 7px 0 3px; word-break: break-word; }
+.r-h-sub { font-size: var(--fs-xs); color: var(--muted); line-height: 1.5; word-break: break-word; }
+.reader-scroll { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+.reader-body { max-width: 680px; margin: 0 auto; padding: 15px 15px 26px; }
+.reader-body p { font-size: 16px; line-height: 1.78; margin: 0; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere; }
+.reader-quote {
+  background: var(--accent-soft); border-left: 4px solid var(--accent);
+  border-radius: 0 12px 12px 0; padding: 12px 14px; margin-bottom: 17px;
+}
+.reader-quote .r-label { font-size: var(--fs-xs); color: var(--accent-strong); letter-spacing: .6px; margin-bottom: 5px; font-weight: 650; }
+.reader-quote p { font-size: 16px; line-height: 1.75; }
+.r-sec { margin: 0 0 19px; }
+.r-sec > h3 {
+  font-size: 17px; font-weight: 700; line-height: 1.4; margin: 0 0 8px;
+  padding-bottom: 6px; border-bottom: 1px solid var(--line);
+}
+.r-sec > h3 .r-sec-sub { font-size: var(--fs-xs); color: var(--muted); font-weight: 400; margin-left: 6px; }
+.r-sec > p + p { margin-top: 9px; }
+.r-list { margin: 0; padding: 0 0 0 22px; }
+.r-list li { font-size: 16px; line-height: 1.78; margin: 6px 0; word-break: break-word; }
+.r-list.warn li::marker { color: var(--warn); }
+.r-quiz { border: 1px solid var(--line); border-radius: 12px; margin: 0 0 10px; background: var(--surface); overflow: hidden; }
+.r-quiz summary {
+  list-style: none; cursor: pointer; min-height: var(--tap);
+  padding: 11px 13px; display: flex; align-items: flex-start; gap: 9px;
+  font-size: 16px; line-height: 1.6; font-weight: 600;
+}
+.r-quiz summary::-webkit-details-marker { display: none; }
+.r-quiz summary .q-no { flex: 0 0 auto; color: var(--accent-strong); font-weight: 700; }
+.r-quiz summary .q-text { flex: 1; min-width: 0; }
+.r-quiz summary .q-tip { flex: 0 0 auto; font-size: var(--fs-xs); color: var(--accent); font-weight: 400; padding-top: 3px; }
+.r-quiz[open] summary .q-tip { color: var(--muted); }
+.r-ans {
+  border-top: 1px dashed var(--line); padding: 11px 13px 13px;
+  font-size: 16px; line-height: 1.78; color: var(--text); background: var(--surface-2);
+  white-space: pre-wrap; word-break: break-word;
+}
+.r-ans b { display: block; font-size: var(--fs-xs); color: var(--ok); margin-bottom: 4px; letter-spacing: .5px; }
+.r-src { margin: 0; padding: 0 0 0 20px; }
+.r-src li { font-size: var(--fs-sm); line-height: 1.7; color: var(--muted); margin: 4px 0; word-break: break-word; }
+.reader-foot {
+  flex: 0 0 auto; background: var(--surface); border-top: 1px solid var(--line);
+  padding: 9px 12px calc(9px + env(safe-area-inset-bottom));
+}
+.reader-foot-inner { max-width: 680px; margin: 0 auto; display: grid; gap: 8px; }
+.rf-row { display: flex; gap: 8px; }
+.rf-row > .btn { flex: 1 1 0; min-width: 0; padding: 0 10px; font-size: var(--fs-sm); }
+
+/* ---------- 轻提示 ---------- */
+.toast {
+  position: fixed; left: 50%; bottom: calc(var(--tabbar-h) + 22px + env(safe-area-inset-bottom));
+  transform: translate(-50%, 12px);
+  background: rgba(20, 40, 46, .94); color: #fff;
+  padding: 10px 16px; border-radius: 12px; font-size: var(--fs-sm);
+  max-width: 84vw; text-align: center;
+  opacity: 0; pointer-events: none; transition: all .22s ease; z-index: 60;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+@media (prefers-color-scheme: dark) {
+  .toast { background: rgba(228, 242, 244, .95); color: #10262c; }
+}
+
+.sheet {
+  position: fixed; inset: 0; z-index: 70; display: none;
+  background: rgba(8, 20, 24, .45);
+  align-items: flex-end;
+}
+.sheet.show { display: flex; }
+.sheet .panel {
+  width: 100%; max-width: 680px; margin: 0 auto;
+  background: var(--surface); border-radius: 20px 20px 0 0;
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+  max-height: 86vh; overflow: auto;
+  animation: sheetUp .24s ease both;
+}
+@keyframes sheetUp { from { transform: translateY(60px); opacity: .6; } to { transform: none; opacity: 1; } }
+.sheet h3 { margin: 0 0 10px; font-size: var(--fs-h2); }
+.sheet textarea {
+  width: 100%; min-height: 200px; font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 12.5px; line-height: 1.5;
+}
+
+/* ---------- 空状态 ---------- */
+.empty { text-align: center; color: var(--muted); font-size: var(--fs-sm); padding: 22px 6px; }
+.empty .big { font-size: 30px; margin-bottom: 6px; opacity: .5; }
+
+.section-title {
+  font-size: var(--fs-xs); color: var(--muted); letter-spacing: .8px;
+  margin: 4px 2px 8px;
+}
+.footer-note { text-align: center; color: var(--muted); font-size: var(--fs-xs); padding: 18px 8px 8px; }
+
+@media (min-width: 700px) {
+  .wrap { padding: 18px 18px 0; }
+  .brand h1 { font-size: 24px; }
+}
+
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <h1>生理学每日学习助手</h1>
+      <div class="sub">移动离线版 · 数据仅存本机</div>
+    </div>
+    <div class="spacer"></div>
+    <button class="icon-btn" data-act="help" aria-label="使用说明" title="使用说明">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="width:23px;height:23px">
+        <circle cx="12" cy="12" r="9"></circle>
+        <path d="M9.2 9.2a2.8 2.8 0 1 1 4 2.6c-.8.5-1.2 1-1.2 1.9"></path>
+        <line x1="12" y1="17.2" x2="12" y2="17.3"></line>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="view active" id="view-today" aria-label="今日任务">
+    <div id="todayBody"></div>
+  </section>
+
+  <section class="view" id="view-quiz" aria-label="答题">
+    <div id="quizBody"></div>
+  </section>
+
+  <section class="view" id="view-card" aria-label="制卡">
+    <div id="cardBody"></div>
+  </section>
+
+  <section class="view" id="view-materials" aria-label="学习材料">
+    <div id="matBody"></div>
+  </section>
+
+  <section class="view" id="view-stats" aria-label="统计">
+    <div id="statsBody"></div>
+  </section>
+</main>
+
+<nav class="tabbar" role="tablist" aria-label="主导航">
+  <div class="tabbar-inner">
+    <button class="tab active" data-tab="today" role="tab" aria-selected="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3.5" y="5" width="17" height="15.5" rx="2.5"></rect>
+        <line x1="3.5" y1="9.6" x2="20.5" y2="9.6"></line>
+        <line x1="8" y1="3.2" x2="8" y2="6.4"></line>
+        <line x1="16" y1="3.2" x2="16" y2="6.4"></line>
+      </svg>
+      <span>今日</span>
+    </button>
+    <button class="tab" data-tab="quiz" role="tab" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4.6" width="13.4" height="16" rx="2.4"></rect>
+        <path d="M19.6 8.2v9.6a2.4 2.4 0 0 1-2.4 2.4H7.4"></path>
+        <line x1="6.6" y1="9.4" x2="12.6" y2="9.4"></line>
+        <line x1="6.6" y1="13.2" x2="12.6" y2="13.2"></line>
+      </svg>
+      <span>答题</span>
+    </button>
+    <button class="tab" data-tab="card" role="tab" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="6" width="18" height="12.6" rx="2.4"></rect>
+        <line x1="7" y1="11" x2="13" y2="11"></line>
+        <line x1="7" y1="14.4" x2="17" y2="14.4"></line>
+      </svg>
+      <span>制卡</span>
+    </button>
+    <button class="tab" data-tab="stats" role="tab" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="4" y1="20" x2="20" y2="20"></line>
+        <rect x="6" y="11" width="3.4" height="6"></rect>
+        <rect x="12" y="7" width="3.4" height="10"></rect>
+        <rect x="17" y="4" width="3.4" height="13"></rect>
+      </svg>
+      <span>统计</span>
+    </button>
+    <button class="tab" data-tab="materials" role="tab" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 5.4A2.4 2.4 0 0 1 6.4 3H20v18H6.4A2.4 2.4 0 0 1 4 18.6z"></path>
+        <path d="M8 3v18"></path>
+        <line x1="11.6" y1="8" x2="16.6" y2="8"></line>
+        <line x1="11.6" y1="12" x2="16.6" y2="12"></line>
+      </svg>
+      <span>材料</span>
+    </button>
+  </div>
+</nav>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<div class="reader" id="reader" role="dialog" aria-modal="true" aria-hidden="true" aria-label="学习材料阅读层">
+  <div class="reader-head"><div class="reader-head-inner" id="readerHead"></div></div>
+  <div class="reader-scroll" id="readerScroll"><div class="reader-body" id="readerBody"></div></div>
+  <div class="reader-foot"><div class="reader-foot-inner" id="readerFoot"></div></div>
+</div>
+
+
+<div class="sheet" id="sheet" role="dialog" aria-modal="true">
+  <div class="panel" id="sheetPanel"></div>
+</div>
+
+<pre id="selftest" style="display:none;margin:0;padding:12px;font-size:12px;line-height:1.5;white-space:pre-wrap;word-break:break-all;background:#0d1a1d;color:#9fe8c6"></pre>
+
+<noscript>
+  <div style="padding:24px;font-size:16px;line-height:1.7">
+    本应用需要 JavaScript 才能运行。请在浏览器设置中开启 JavaScript 后重新打开本文件。
+  </div>
+</noscript>
+
+<script>
+window.__NKDATA__ = {"generated":"2026-10-20","plan_start":"2026-10-21","plan_end":"2027-02-20","cols":["日期","星期","计划第N天","类型","模块","知识点","教材章节","学习目标","必掌握判别要点","练习任务","复习标记","D1复习日期","D3复习日期","D7复习日期","D14复习日期","D30复习日期","优先级"],"intervals":[1,3,7,14,30,60],"plan":[["2026-10-21","周三","1","新知识点","绪论","生理学的研究对象与研究方法","第一章 第一节 生理学的研究内容和方法","说清整体水平、器官系统、细胞分子三个层次及各层次常用方法","急性动物实验含在体与离体；慢性实验可观察清醒状态整体功能；三层水平是同一问题的不同尺度","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-10-22","2026-10-24","2026-10-28","2026-11-04","2026-11-20","B"],["2026-10-22","周四","2","新知识点","绪论","内环境与稳态","第一章 第二节 机体的内环境","能定义内环境并说明稳态的动态含义","内环境指细胞外液；稳态是理化性质在微小波动中的动态平衡，不是恒定不变；负反馈是其维持机制","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-10-23","2026-10-25","2026-10-29","2026-11-05","2026-11-21","A"],["2026-10-23","周五","3","新知识点","绪论","生理功能的调节方式","第一章 第三节 机体生理功能的调节","区分神经调节、体液调节、自身调节的特点与举例","神经调节快准短、占主导；体液调节慢广久；自身调节不依赖神经体液，如心肌异长自身调节、肾血流自身调节","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-10-24","2026-10-26","2026-10-30","2026-11-06","2026-11-22","A"],["2026-10-24","周六","4","新知识点","绪论","反馈控制与前馈","第一章 第三节 体内的控制系统","用控制论语言描述负反馈、正反馈、前馈并给出实例","负反馈：压力感受性反射、体温调节；正反馈：分娩、排尿、凝血、动作电位Na+内流；前馈：进食前胃液分泌","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-10-25","2026-10-27","2026-10-31","2026-11-07","2026-11-23","A"],["2026-10-25","周日","5","新知识点","细胞的基本功能","细胞膜的结构与跨膜转运总览","第二章 第一节 细胞膜的结构和物质转运功能","按耗能与否、是否需膜蛋白给转运方式分类","脂溶性小分子单纯扩散；水与水溶性小分子经通道或载体；逆浓度梯度需耗能者为主动转运","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-10-26","2026-10-28","2026-11-01","2026-11-08","2026-11-24","B"],["2026-10-26","周一","6","复盘日","综合","复盘：生理学的研究对象与研究方法、内环境与稳态、生理功能的调节方式、反馈控制与前馈、细胞膜的结构与跨膜转运总览","复盘/模考","闭卷复述并重做本轮5个知识点卡片","复述不出的条目当天回读精讲，并标记为薄弱点","① 重做本轮5个知识点卡片；② 复述不出的条目回读精讲；③ 标记薄弱点","—","—","—","—","—","—","A"],["2026-10-27","周二","7","新知识点","细胞的基本功能","单纯扩散与易化扩散","第二章 第一节 细胞膜的结构和物质转运功能","区分单纯扩散、经载体易化扩散、经通道易化扩散三者特征","易化扩散有结构特异性、饱和现象、竞争性抑制；通道有门控与离子选择性；单纯扩散无饱和","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-10-28","2026-10-30","2026-11-03","2026-11-10","2026-11-26","A"],["2026-10-28","周三","8","新知识点","细胞的基本功能","原发性主动转运：钠泵","第二章 第一节 细胞膜的结构和物质转运功能","说明钠泵化学本质、转运比例与生理意义","Na+-K+-ATP酶，每分解1分子ATP移出3个Na+、移入2个K+；意义：维持离子梯度、构成RP基础、为继发性主动转运供能、调节细胞体积","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-10-29","2026-10-31","2026-11-04","2026-11-11","2026-11-27","A"],["2026-10-29","周四","9","新知识点","细胞的基本功能","继发性主动转运与膜泡运输","第二章 第一节 细胞膜的结构和物质转运功能","能举例说明同向、反向转运与出胞入胞","肠上皮与肾小管葡萄糖、氨基酸转运依赖钠泵建立的Na+梯度；出胞入胞转运大分子，需耗能，Ca2+依赖的囊泡融合","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-10-30","2026-11-01","2026-11-05","2026-11-12","2026-11-28","B"],["2026-10-30","周五","10","新知识点","细胞的基本功能","静息电位及其产生机制","第二章 第二节 细胞的生物电现象","说明RP数值范围与形成原因","骨骼肌约-90mV、神经细胞约-70mV；主要由K+外流达到电化学平衡决定，安静时膜对K+通透性最高；钠泵生电作用参与少量","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-10-31","2026-11-02","2026-11-06","2026-11-13","2026-11-29","A"],["2026-10-31","周六","11","新知识点","细胞的基本功能","动作电位的波形与离子机制","第二章 第二节 细胞的生物电现象","按去极相、复极相、超射描述并对应离子流","去极相由Na+内流（电压门控钠通道开放）形成；复极相由K+外流形成；锋电位是主要标志，具全或无特性","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-11-01","2026-11-03","2026-11-07","2026-11-14","2026-11-30","A"],["2026-11-01","周日","12","复盘日","综合","复盘：单纯扩散与易化扩散、原发性主动转运：钠泵、继发性主动转运与膜泡运输、静息电位及其产生机制、动作电位的波形与离子机制","复盘/模考","闭卷复述并重做本轮5个知识点卡片","复述不出的条目当天回读精讲，并标记为薄弱点","① 重做本轮5个知识点卡片；② 复述不出的条目回读精讲；③ 标记薄弱点","—","—","—","—","—","—","A"],["2026-11-02","周一","13","新知识点","细胞的基本功能","动作电位的传导与局部电位","第二章 第二节 细胞的生物电现象","能从传导方式与是否衰减两方面区分AP与局部电位","AP不衰减、全或无、有不应期，无髓纤维连续传导、有髓纤维跳跃式传导；局部电位随距离衰减、可总和、无不应期","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-11-03","2026-11-05","2026-11-09","2026-11-16","2026-12-02","A"],["2026-11-03","周二","14","新知识点","细胞的基本功能","阈电位、阈刺激与兴奋性","第二章 第二节 细胞的生物电现象","说明阈电位与兴奋性的关系及兴奋后兴奋性变化","阈电位与RP差距越小兴奋性越高；兴奋后经历绝对不应期、相对不应期、超常期、低常期；绝对不应期决定AP最高频率","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-11-04","2026-11-06","2026-11-10","2026-11-17","2026-12-03","A"],["2026-11-04","周三","15","新知识点","细胞的基本功能","神经-骨骼肌接头兴奋传递","第二章 第三节 肌细胞的收缩功能","按电、化学、电三步描述传递过程及影响因素","AP到达末梢、Ca2+内流、ACh囊泡释放、结合终板膜N2受体、终板电位、肌膜AP；ACh被胆碱酯酶水解；箭毒阻断受体、新斯的明抑制酶","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-11-05","2026-11-07","2026-11-11","2026-11-18","2026-12-04","A"],["2026-11-05","周四","16","新知识点","细胞的基本功能","骨骼肌收缩的滑行学说与兴奋-收缩耦联","第二章 第三节 肌细胞的收缩功能","说明肌丝滑行机制与耦联的三个关键环节","细肌丝向M线滑行、肌节缩短，粗肌丝长度不变；耦联三环节：肌膜AP经T管传入、三联管处Ca2+释放、Ca2+与肌钙蛋白结合触发横桥周期；Ca2+是耦联因子","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-11-06","2026-11-08","2026-11-12","2026-11-19","2026-12-05","A"],["2026-11-06","周五","17","新知识点","细胞的基本功能","肌肉收缩的力学表现","第二章 第三节 肌细胞的收缩功能","区分等长与等张收缩，说明前后负荷对做功的影响","等长收缩张力增而长度不变，等张收缩长度缩短而张力不变；前负荷决定初长度（异长自身调节），后负荷增大则缩短速度减慢、做功先增后减","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-11-07","2026-11-09","2026-11-13","2026-11-20","2026-12-06","B"],["2026-11-07","周六","18","复盘日","综合","复盘：动作电位的传导与局部电位、阈电位、阈刺激与兴奋性、神经-骨骼肌接头兴奋传递、骨骼肌收缩的滑行学说与兴奋-收缩耦联、肌肉收缩的力学表现","复盘/模考","闭卷复述并重做本轮5个知识点卡片","复述不出的条目当天回读精讲，并标记为薄弱点","① 重做本轮5个知识点卡片；② 复述不出的条目回读精讲；③ 标记薄弱点","—","—","—","—","—","—","A"],["2026-11-08","周日","19","新知识点","血液","血液的组成与理化特性","第三章 第一节 血液的组成和理化特性","列出血液有形成分与血浆蛋白三类的功能","血浆蛋白：白蛋白维持胶体渗透压、球蛋白参与免疫与运输、纤维蛋白原参与凝血；血浆pH 7.35至7.45，渗透压约300mOsm/(kg·H2O)","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-11-09","2026-11-11","2026-11-15","2026-11-22","2026-12-08","B"],["2026-11-09","周一","20","新知识点","血液","血浆渗透压与红细胞的渗透脆性","第三章 第一节 血液的组成和理化特性","区分晶体渗透压与胶体渗透压的作用并解释临床输液原则","晶体渗透压占绝大部分、主要维持细胞内外水平衡；胶体渗透压由白蛋白形成、维持血管内外水平衡；低渗液致红细胞膨胀破裂，高渗致皱缩","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-11-10","2026-11-12","2026-11-16","2026-11-23","2026-12-09","A"],["2026-11-10","周二","21","新知识点","血液","红细胞生理与生成的调节","第三章 第二节 血细胞生理","说明红细胞数量、寿命、生成原料与EPO调节","成年男性(4.5至5.5)×10^12/L，寿命约120天，衰老在脾破坏；生成需铁、叶酸、维生素B12、蛋白质；缺氧经肾产生EPO促红系增殖分化","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-11-11","2026-11-13","2026-11-17","2026-11-24","2026-12-10","A"],["2026-11-11","周三","22","新知识点","血液","白细胞与血小板生理","第三章 第二节 血细胞生理","说明白细胞分类计数意义与血小板功能","中性粒细胞占比最高、参与急性化脓性感染；血小板参与止血第一相（黏附、聚集、释放），正常(100至300)×10^9/L","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-11-12","2026-11-14","2026-11-18","2026-11-25","2026-12-11","B"],["2026-11-12","周四","23","新知识点","血液","生理性止血的基本过程","第三章 第三节 生理性止血","按三阶段描述止血过程及各自时限","血管收缩、血小板血栓形成（一期止血）、血液凝固（二期止血）；出血时间反映血小板与血管功能，凝血时间反映凝血因子","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-11-13","2026-11-15","2026-11-19","2026-11-26","2026-12-12","A"],["2026-11-13","周五","24","复盘日","综合","复盘：血液的组成与理化特性、血浆渗透压与红细胞的渗透脆性、红细胞生理与生成的调节、白细胞与血小板生理、生理性止血的基本过程","复盘/模考","闭卷复述并重做本轮5个知识点卡片","复述不出的条目当天回读精讲，并标记为薄弱点","① 重做本轮5个知识点卡片；② 复述不出的条目回读精讲；③ 标记薄弱点","—","—","—","—","—","—","A"],["2026-11-14","周六","25","新知识点","血液","血液凝固的机制与途径","第三章 第三节 生理性止血","说明凝血因子特点、内源与外源途径的启动与汇合点","多数凝血因子为蛋白酶原、需维生素K参与（Ⅱ、Ⅶ、Ⅸ、Ⅹ）；内源由Ⅻ接触激活启动，外源由组织因子启动，二者在Ⅹ因子激活处汇合，共同通路为凝血酶原转凝血酶再形成纤维蛋白","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-11-15","2026-11-17","2026-11-21","2026-11-28","2026-12-14","A"],["2026-11-15","周日","26","新知识点","血液","抗凝系统与纤维蛋白溶解","第三章 第三节 生理性止血","列举主要抗凝物质与纤溶过程","抗凝血酶Ⅲ、蛋白质C系统、组织因子途径抑制物；纤溶：纤溶酶原经激活物转为纤溶酶，降解纤维蛋白；肝素增强抗凝血酶Ⅲ活性","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-11-16","2026-11-18","2026-11-22","2026-11-29","2026-12-15","B"],["2026-11-16","周一","27","新知识点","血液","ABO血型系统","第三章 第四节 血型和输血原则","按抗原抗体说明分型依据与凝集反应","A型红细胞含A抗原、血清含抗B；B型含B抗原、抗A；AB型含A和B抗原、无抗体；O型无抗原、含抗A抗B；天然抗体为IgM，不能通过胎盘","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-11-17","2026-11-19","2026-11-23","2026-11-30","2026-12-16","A"],["2026-11-17","周二","28","新知识点","血液","Rh血型与输血原则","第三章 第四节 血型和输血原则","说明Rh阴性输注风险与新生儿溶血机制","Rh抗原以D抗原性最强；Rh阴性者第二次接受Rh阳性血可发生溶血；母Rh阴性、胎Rh阳性时IgG抗体通过胎盘致新生儿溶血；输血须同型且交叉配血","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-11-18","2026-11-20","2026-11-24","2026-12-01","2026-12-17","A"],["2026-11-18","周三","29","新知识点","血液循环","心肌细胞的分类与电生理特性","第四章 第一节 心脏的泵血功能","区分工作细胞与自律细胞、快反应与慢反应细胞","工作细胞（心房肌、心室肌）无自律性；自律细胞（窦房结、浦肯野）有4期自动去极；快反应细胞0期由Na+内流，慢反应细胞0期由Ca2+内流","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-11-19","2026-11-21","2026-11-25","2026-12-02","2026-12-18","B"],["2026-11-19","周四","30","复盘日","综合","复盘：血液凝固的机制与途径、抗凝系统与纤维蛋白溶解、ABO血型系统、Rh血型与输血原则、心肌细胞的分类与电生理特性","复盘/模考","闭卷复述并重做本轮5个知识点卡片","复述不出的条目当天回读精讲，并标记为薄弱点","① 重做本轮5个知识点卡片；② 复述不出的条目回读精讲；③ 标记薄弱点","—","—","—","—","—","—","A"],["2026-11-20","周五","31","新知识点","血液循环","心室肌细胞动作电位各期机制","第四章 第一节 心脏的泵血功能","按0至4期说出离子流并解释平台期意义","0期Na+内流；1期K+外流；2期平台Ca2+内流与K+外流平衡，是AP时程长、不出现强直收缩的原因；3期K+外流；4期钠泵与Na+-Ca2+交换恢复","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-11-21","2026-11-23","2026-11-27","2026-12-04","2026-12-20","A"],["2026-11-21","周六","32","新知识点","血液循环","窦房结细胞电位与心肌自律性","第四章 第一节 心脏的泵血功能","说明4期自动去极机制与正常起搏点","窦房结P细胞4期由K+外流衰减、If钠内流、T型钙通道激活共同形成；最大复极电位绝对值小、阈电位约-40mV，故自律性最高，为正常起搏点","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-11-22","2026-11-24","2026-11-28","2026-12-05","2026-12-21","A"],["2026-11-22","周日","33","新知识点","血液循环","心肌兴奋性、期前收缩与代偿间歇","第四章 第一节 心脏的泵血功能","解释有效不应期长与代偿间歇形成","心肌有效不应期特别长（含平台期），故不发生强直收缩；有效不应期后给予额外刺激可产生期前收缩，其后窦性冲动落在不应期而出现代偿间歇","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-11-23","2026-11-25","2026-11-29","2026-12-06","2026-12-22","A"],["2026-11-23","周一","34","新知识点","血液循环","心肌的传导性与收缩性特点","第四章 第一节 心脏的泵血功能","说明传导速度差异与同步收缩特点","房室结传导最慢（房室延搁，保证房先于室收缩）；浦肯野纤维最快；心肌收缩依赖细胞外Ca2+，呈全或无式同步收缩","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-11-24","2026-11-26","2026-11-30","2026-12-07","2026-12-23","B"],["2026-11-24","周二","35","新知识点","血液循环","心动周期与心脏泵血过程","第四章 第一节 心脏的泵血功能","按等容收缩、快速射血、减慢射血、等容舒张、充盈期描述压力容积变化","等容收缩期室内压升高最快、两瓣均关闭；快速射血期室内压最高、主动脉压降至最低点；等容舒张期室内压下降最快；心房收缩贡献约25%充盈","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-11-25","2026-11-27","2026-12-01","2026-12-08","2026-12-24","A"],["2026-11-25","周三","36","复盘日","综合","复盘：心室肌细胞动作电位各期机制、窦房结细胞电位与心肌自律性、心肌兴奋性、期前收缩与代偿间歇、心肌的传导性与收缩性特点、心动周期与心脏泵血过程","复盘/模考","闭卷复述并重做本轮5个知识点卡片","复述不出的条目当天回读精讲，并标记为薄弱点","① 重做本轮5个知识点卡片；② 复述不出的条目回读精讲；③ 标记薄弱点","—","—","—","—","—","—","A"],["2026-11-26","周四","37","新知识点","血液循环","心输出量及其影响因素","第四章 第一节 心脏的泵血功能","从前后负荷、心肌收缩能力、心率四方面分析","每搏量为舒张末期容积减收缩末期容积；心输出量为每搏量乘心率；前负荷（异长自身调节）、后负荷（动脉压）、收缩能力（等长调节）、心率过快时因充盈不足反而下降","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-11-27","2026-11-29","2026-12-03","2026-12-10","2026-12-26","A"],["2026-11-27","周五","38","新知识点","血液循环","心音与心功能评价","第四章 第一节 心脏的泵血功能","说明四个心音成因与主要临床意义","第一心音房室瓣关闭、标志心室收缩开始；第二心音半月瓣关闭；第三心音快速充盈期；第四心音心房收缩；射血分数正常不低于55%","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-11-28","2026-11-30","2026-12-04","2026-12-11","2026-12-27","B"],["2026-11-28","周六","39","新知识点","血液循环","动脉血压与影响因素","第四章 第二节 血管生理","说明血压形成条件与五大影响因素","形成条件：循环系统充盈、心脏射血、外周阻力、大动脉弹性；影响因素：每搏量（收缩压为主）、心率、外周阻力（舒张压为主）、大动脉弹性、循环血量与血管容量比","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-11-29","2026-12-01","2026-12-05","2026-12-12","2026-12-28","A"],["2026-11-29","周日","40","新知识点","血液循环","微循环与组织液生成","第四章 第二节 血管生理","说出三条通路功能及Starling力组成","微循环通路：迂回通路（物质交换）、直捷通路（回流）、动静脉短路（体温调节）；有效滤过压等于毛细血管压加组织液胶体渗透压，减去血浆胶体渗透压与组织液静水压","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-11-30","2026-12-02","2026-12-06","2026-12-13","2026-12-29","A"],["2026-11-30","周一","41","新知识点","血液循环","静脉血压与静脉回流","第四章 第二节 血管生理","列举影响静脉回流的五个因素","中心静脉压反映心脏射血能力与血容量；影响因素：体循环平均充盈压、心脏收缩力、体位改变、骨骼肌泵、呼吸泵","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-01","2026-12-03","2026-12-07","2026-12-14","2026-12-30","B"],["2026-12-01","周二","42","复盘日","综合","复盘：心输出量及其影响因素、心音与心功能评价、动脉血压与影响因素、微循环与组织液生成、静脉血压与静脉回流","复盘/模考","闭卷复述并重做本轮5个知识点卡片","复述不出的条目当天回读精讲，并标记为薄弱点","① 重做本轮5个知识点卡片；② 复述不出的条目回读精讲；③ 标记薄弱点","—","—","—","—","—","—","A"],["2026-12-02","周三","43","新知识点","血液循环","心血管活动的神经调节","第四章 第三节 心血管活动的调节","说明压力感受性反射的完整通路与意义","颈动脉窦与主动脉弓压力感受器、舌咽与迷走神经、延髓孤束核、心迷走与心交感及缩血管中枢；血压升高时反射性心率减慢、血管舒张，属负反馈，对波动性血压缓冲最强","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-03","2026-12-05","2026-12-09","2026-12-16","2027-01-01","A"],["2026-12-03","周四","44","新知识点","血液循环","心血管活动的体液调节","第四章 第三节 心血管活动的调节","区分肾上腺素与去甲肾上腺素作用差异及RAAS","肾上腺素对α、β受体均强，心输出量增加、总外周阻力变化不大；去甲肾上腺素主要激动α受体，升压明显、反射性心率减慢；血管紧张素Ⅱ收缩血管并促醛固酮分泌","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-04","2026-12-06","2026-12-10","2026-12-17","2027-01-02","A"],["2026-12-04","周五","45","新知识点","血液循环","冠脉循环与脑循环特点","第四章 第四节 器官循环","说明冠脉血流特点与脑循环的血脑屏障","冠脉血流主要在舒张期、受心肌代谢产物（腺苷）调节；脑循环存在血脑屏障与自身调节，对缺氧和CO2敏感","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-05","2026-12-07","2026-12-11","2026-12-18","2027-01-03","B"],["2026-12-05","周六","46","新知识点","呼吸","呼吸过程与肺通气原理","第五章 第一节 肺通气","说清外呼吸、气体运输、内呼吸三环节及肺通气动力","肺通气动力是呼吸肌收缩引起的肺内压与大气压差；平静吸气主动、呼气被动；胸膜腔内压为负压（-5至-10cmH2O），维持肺扩张与静脉回流","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-06","2026-12-08","2026-12-12","2026-12-19","2027-01-04","A"],["2026-12-06","周日","47","新知识点","呼吸","肺容积与肺容量","第五章 第一节 肺通气","定义潮气量、补吸气量、残气量、肺活量与功能残气量关系","肺活量为潮气量加补吸气量加补呼气量；功能残气量为残气量加补呼气量；残气量不能呼出，阻塞性通气障碍时残气量与肺总量比值升高","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-07","2026-12-09","2026-12-13","2026-12-20","2027-01-05","A"],["2026-12-07","周一","48","复盘日","综合","复盘：心血管活动的神经调节、心血管活动的体液调节、冠脉循环与脑循环特点、呼吸过程与肺通气原理、肺容积与肺容量","复盘/模考","闭卷复述并重做本轮5个知识点卡片","复述不出的条目当天回读精讲，并标记为薄弱点","① 重做本轮5个知识点卡片；② 复述不出的条目回读精讲；③ 标记薄弱点","—","—","—","—","—","—","A"],["2026-12-08","周二","49","新知识点","呼吸","肺通气功能的评价","第五章 第一节 肺通气","区分每分通气量与肺泡通气量并解释深慢呼吸的意义","肺泡通气量为潮气量减无效腔气量再乘呼吸频率；浅快呼吸使肺泡通气量显著下降；深慢呼吸可提高肺泡通气效率","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-09","2026-12-11","2026-12-15","2026-12-22","2027-01-07","A"],["2026-12-09","周三","50","新知识点","呼吸","气体交换与影响因素","第五章 第二节 肺换气和组织换气","说明分压差、面积、厚度、通气血流比值对换气的影响","换气动力是分压差；VA/Q正常约0.84，比值增大相当无效腔增大，减小相当功能性分流；肺纤维化使弥散距离增大","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-10","2026-12-12","2026-12-16","2026-12-23","2027-01-08","A"],["2026-12-10","周四","51","新知识点","呼吸","氧的运输与氧解离曲线","第五章 第三节 气体在血液中的运输","解释曲线形态、P50及右移左移的临床意义","Hb与O2结合呈S形曲线；P50正常约26.5mmHg；右移（pH下降、PCO2升高、温度升高、2,3-DPG增多）利于释氧，左移如低温与库存血时释氧减少","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-11","2026-12-13","2026-12-17","2026-12-24","2027-01-09","A"],["2026-12-11","周五","52","新知识点","呼吸","二氧化碳的运输","第五章 第三节 气体在血液中的运输","说明CO2三种运输形式及碳酸酐酶、霍尔丹效应","物理溶解约5%、氨基甲酰血红蛋白约7%、HCO3-约88%；碳酸酐酶在红细胞内催化CO2水化；霍尔丹效应指Hb氧合促进CO2释放","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-12","2026-12-14","2026-12-18","2026-12-25","2027-01-10","A"],["2026-12-12","周六","53","新知识点","呼吸","呼吸中枢与呼吸节律的形成","第五章 第四节 呼吸运动的调节","说明各级呼吸中枢定位与节律起源","基本呼吸中枢在延髓；呼吸调整中枢在脑桥；节律起源于延髓前包钦格复合体的起步细胞；大脑皮层可随意控制呼吸","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-13","2026-12-15","2026-12-19","2026-12-26","2027-01-11","A"],["2026-12-13","周日","54","复盘日","综合","复盘：肺通气功能的评价、气体交换与影响因素、氧的运输与氧解离曲线、二氧化碳的运输、呼吸中枢与呼吸节律的形成","复盘/模考","闭卷复述并重做本轮5个知识点卡片","复述不出的条目当天回读精讲，并标记为薄弱点","① 重做本轮5个知识点卡片；② 复述不出的条目回读精讲；③ 标记薄弱点","—","—","—","—","—","—","A"],["2026-12-14","周一","55","新知识点","呼吸","化学感受性呼吸反射","第五章 第四节 呼吸运动的调节","区分中枢与外周化学感受器对CO2、H+、O2的反应","中枢化学感受器对H+敏感、对缺氧不敏感；外周颈动脉体与主动脉体对缺氧敏感；CO2是维持呼吸最重要的生理性刺激；缺氧兴奋呼吸的作用弱于CO2","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-15","2026-12-17","2026-12-21","2026-12-28","2027-01-13","A"],["2026-12-15","周二","56","新知识点","呼吸","肺牵张反射与其他呼吸反射","第五章 第四节 呼吸运动的调节","说明肺牵张反射的组成与防御性反射","肺扩张引起吸气抑制（黑伯反射），肺缩小引起吸气兴奋；咳嗽、喷嚏为防御性反射；J感受器参与肺水肿时的呼吸急促","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-16","2026-12-18","2026-12-22","2026-12-29","2027-01-14","B"],["2026-12-16","周三","57","新知识点","消化和吸收","消化道平滑肌的生理特性","第六章 第一节 消化生理概述","列出兴奋性低、自律性、紧张性、伸展性、敏感性五个特点","静息电位不稳定、有基本电节律（慢波）；对机械牵张、温度、化学刺激敏感，对电刺激不敏感","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-17","2026-12-19","2026-12-23","2026-12-30","2027-01-15","B"],["2026-12-17","周四","58","新知识点","消化和吸收","消化系统的神经支配","第六章 第一节 消化生理概述","区分内在神经丛与外来神经的作用","内在神经丛（黏膜下与肌间神经丛）构成肠神经系统，可独立完成局部反射；副交感（迷走）促进运动与分泌，交感抑制","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-18","2026-12-20","2026-12-24","2026-12-31","2027-01-16","A"],["2026-12-18","周五","59","新知识点","消化和吸收","胃肠激素","第六章 第一节 消化生理概述","列举主要胃肠激素的来源与作用","促胃液素（G细胞）促胃酸分泌与黏膜生长；促胰液素（S细胞）促胰液的水和HCO3-；缩胆囊素（I细胞）促胆囊收缩与胰酶分泌；抑胃肽促胰岛素释放","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-19","2026-12-21","2026-12-25","2027-01-01","2027-01-17","A"],["2026-12-19","周六","60","模考日","综合","模考：20题覆盖已学模块","复盘/模考","限时20题，正确率不低于80%","错题按模块归类，正确率低于80%的模块回炉该模块全部卡片","① 限时20题模考；② 错题按模块归类；③ 正确率低于80%的模块回炉","—","—","—","—","—","—","A"],["2026-12-20","周日","61","新知识点","消化和吸收","唾液分泌与咀嚼吞咽","第六章 第二节 口腔内消化","说明唾液成分、调节及吞咽反射过程","唾液为低渗液，含唾液淀粉酶、溶菌酶；纯神经反射性调节，副交感促进；吞咽分口腔期（随意）、咽期、食管期","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-21","2026-12-23","2026-12-27","2027-01-03","2027-01-19","B"],["2026-12-21","周一","62","新知识点","消化和吸收","胃液分泌与胃黏膜屏障","第六章 第三节 胃内消化","说明壁细胞泌酸机制、内因子及消化期分泌三相","壁细胞H+-K+-ATP酶泌酸，组胺、促胃液素、ACh促分泌，前列腺素与质子泵抑制剂抑制；内因子促维生素B12吸收；头期约30%、胃期约60%、肠期约10%","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-22","2026-12-24","2026-12-28","2027-01-04","2027-01-20","A"],["2026-12-22","周二","63","新知识点","消化和吸收","胃的运动与胃排空","第六章 第三节 胃内消化","说明容受性舒张、蠕动及排空的控制","容受性舒张由迷走迷走反射介导；排空速度糖快于蛋白质快于脂肪，受十二指肠反馈（肠胃反射、抑胃肽）抑制；液体排空快","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-23","2026-12-25","2026-12-29","2027-01-05","2027-01-21","A"],["2026-12-23","周三","64","新知识点","消化和吸收","胰液的分泌与调节","第六章 第四节 小肠内消化","说明胰液成分、促胰液素与缩胆囊素的双重调节","胰液含胰淀粉酶、胰脂肪酶、胰蛋白酶原等，是最重要的消化液；促胰液素促水和HCO3-分泌，缩胆囊素促胰酶分泌；胰蛋白酶原由肠激酶激活","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-24","2026-12-26","2026-12-30","2027-01-06","2027-01-22","A"],["2026-12-24","周四","65","新知识点","消化和吸收","胆汁的分泌与胆盐的肠肝循环","第六章 第四节 小肠内消化","说明胆盐的作用与肠肝循环意义","胆汁不含消化酶；胆盐乳化脂肪、形成混合微胶粒、促进脂溶性维生素吸收；95%胆盐在回肠末端重吸收经门静脉回肝","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-25","2026-12-27","2026-12-31","2027-01-07","2027-01-23","A"],["2026-12-25","周五","66","复盘日","综合","复盘：唾液分泌与咀嚼吞咽、胃液分泌与胃黏膜屏障、胃的运动与胃排空、胰液的分泌与调节、胆汁的分泌与胆盐的肠肝循环","复盘/模考","闭卷复述并重做本轮5个知识点卡片","复述不出的条目当天回读精讲，并标记为薄弱点","① 重做本轮5个知识点卡片；② 复述不出的条目回读精讲；③ 标记薄弱点","—","—","—","—","—","—","A"],["2026-12-26","周六","67","新知识点","消化和吸收","小肠的运动与吸收","第六章 第四节 小肠内消化","说明分节运动的作用与主要营养物质吸收部位","分节运动使食糜与消化液充分混合、增加接触面积；铁在十二指肠、钙在小肠上段、维生素B12在回肠末端、胆盐与脂肪酸在回肠吸收","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-27","2026-12-29","2027-01-02","2027-01-09","2027-01-25","A"],["2026-12-27","周日","68","新知识点","能量代谢与体温","能量代谢与测定原理","第七章 第一节 能量代谢","说明直接与间接测热法原理及呼吸商概念","能量代谢测定基于能量守恒；间接测热法测耗氧量与CO2产量，呼吸商等于CO2产量除以耗氧量；糖呼吸商1.0、脂肪0.71、蛋白质0.80、混合膳食约0.85","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-28","2026-12-30","2027-01-03","2027-01-10","2027-01-26","B"],["2026-12-28","周一","69","新知识点","能量代谢与体温","影响能量代谢的因素","第七章 第一节 能量代谢","列出肌肉活动、精神活动、食物特殊动力效应、环境温度的影响","肌肉活动影响最显著；食物特殊动力效应以蛋白质最强（约30%）；环境温度在20至30℃时代谢最稳定","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-29","2026-12-31","2027-01-04","2027-01-11","2027-01-27","A"],["2026-12-29","周二","70","新知识点","能量代谢与体温","基础代谢与基础代谢率","第七章 第一节 能量代谢","定义基础代谢率并说明其临床意义","基础状态为清醒、静卧、空腹12小时以上、室温20至25℃；BMR实测值与正常平均值相差超过15%有病理意义；甲亢升高、甲减降低","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-30","2027-01-01","2027-01-05","2027-01-12","2027-01-28","A"],["2026-12-30","周三","71","新知识点","能量代谢与体温","体温与体温的正常变动","第七章 第二节 体温","说明体核温度、体壳温度及昼夜与性别差异","体核温度以直肠最高、腋窝最低；清晨2至6时最低、午后最高，波动不超过1℃；女性排卵后体温升高0.3至0.5℃","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2026-12-31","2027-01-02","2027-01-06","2027-01-13","2027-01-29","A"],["2026-12-31","周四","72","复盘日","综合","复盘：小肠的运动与吸收、能量代谢与测定原理、影响能量代谢的因素、基础代谢与基础代谢率、体温与体温的正常变动","复盘/模考","闭卷复述并重做本轮5个知识点卡片","复述不出的条目当天回读精讲，并标记为薄弱点","① 重做本轮5个知识点卡片；② 复述不出的条目回读精讲；③ 标记薄弱点","—","—","—","—","—","—","A"],["2027-01-01","周五","73","新知识点","能量代谢与体温","机体的产热与散热","第七章 第二节 体温","区分战栗与非战栗产热，说明四种散热方式","战栗产热来自骨骼肌节律性收缩；非战栗产热来自棕色脂肪组织解偶联；散热方式：辐射、传导、对流、蒸发，环境温度高于皮肤温度时蒸发是唯一途径","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-01-02","2027-01-04","2027-01-08","2027-01-15","2027-01-31","A"],["2027-01-02","周六","74","新知识点","能量代谢与体温","体温调节与调定点学说","第七章 第二节 体温","用调定点学说解释发热与中暑机制","温度敏感神经元在下丘脑视前区-下丘脑前部；调定点由PO/AH设定，发热是调定点上移（致热原使PGE2升高），中暑是调定点未变而散热失效，两者机制不同","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-01-03","2027-01-05","2027-01-09","2027-01-16","2027-02-01","A"],["2027-01-03","周日","75","新知识点","尿的生成和排出","肾血流量的自身调节","第八章 第一节 肾的功能解剖和肾血流量","说明肌源学说与管球反馈及调节范围","动脉压在80至180mmHg范围内肾血流量保持相对恒定；机制为入球小动脉肌源性收缩与致密斑管球反馈；超出范围则随血压变化","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-01-04","2027-01-06","2027-01-10","2027-01-17","2027-02-02","A"],["2027-01-04","周一","76","新知识点","尿的生成和排出","肾小球滤过与滤过分数","第八章 第二节 肾小球的滤过功能","说明滤过膜三层结构、有效滤过压与滤过分数","滤过膜由内皮细胞、基膜、足细胞裂孔膜构成；有效滤过压为肾小球毛细血管压减血浆胶体渗透压减囊内压；滤过分数约19%，正常滤过率125ml/min","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-01-05","2027-01-07","2027-01-11","2027-01-18","2027-02-03","A"],["2027-01-05","周二","77","新知识点","尿的生成和排出","影响肾小球滤过的因素","第八章 第二节 肾小球的滤过功能","从有效滤过压、滤过膜、肾血浆流量三方面分析","肾小球毛细血管压升高滤过增加；血浆胶体渗透压升高（大量输血浆代用品）滤过减少；囊内压升高（结石、肿瘤）滤过减少；滤过膜面积减小或通透性增大分别致少尿与蛋白尿","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-01-06","2027-01-08","2027-01-12","2027-01-19","2027-02-04","A"],["2027-01-06","周三","78","复盘日","综合","复盘：机体的产热与散热、体温调节与调定点学说、肾血流量的自身调节、肾小球滤过与滤过分数、影响肾小球滤过的因素","复盘/模考","闭卷复述并重做本轮5个知识点卡片","复述不出的条目当天回读精讲，并标记为薄弱点","① 重做本轮5个知识点卡片；② 复述不出的条目回读精讲；③ 标记薄弱点","—","—","—","—","—","—","A"],["2027-01-07","周四","79","新知识点","尿的生成和排出","近端小管的重吸收","第八章 第三节 肾小管和集合管的物质转运功能","说明近端小管重吸收比例与定比重吸收特点","近端小管重吸收约65%至70%的Na+与水，葡萄糖、氨基酸全部重吸收；葡萄糖重吸收有极限，肾糖阈约180mg/dl；为等渗性重吸收","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-01-08","2027-01-10","2027-01-14","2027-01-21","2027-02-06","A"],["2027-01-08","周五","80","新知识点","尿的生成和排出","髓袢与逆流倍增机制","第八章 第三节 肾小管和集合管的物质转运功能","说明髓袢降支与升支通透性差异及直小血管作用","降支细段对水通透、对NaCl不通透；升支粗段主动重吸收NaCl而对水不通透，形成髓质渗透梯度；直小血管以逆流交换维持梯度","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-01-09","2027-01-11","2027-01-15","2027-01-22","2027-02-07","A"],["2027-01-09","周六","81","新知识点","尿的生成和排出","远曲小管与集合管的重吸收与分泌","第八章 第三节 肾小管和集合管的物质转运功能","说明Na+重吸收、K+分泌与H+分泌的相互关系","远曲小管与集合管重吸收约10%Na+，受醛固酮调节；Na+重吸收增多促进K+分泌（钠钾交换），K+与H+分泌存在竞争；H+分泌与HCO3-重吸收耦联","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-01-10","2027-01-12","2027-01-16","2027-01-23","2027-02-08","A"],["2027-01-10","周日","82","新知识点","尿的生成和排出","尿液的浓缩与稀释","第八章 第四节 尿的生成和排出","说明髓质渗透梯度与ADH是浓缩的两个必要条件","ADH促进集合管对水通透，水在髓质高渗区被重吸收形成浓缩尿；缺乏ADH时排出稀释尿；髓袢结构是形成梯度的基础","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-01-11","2027-01-13","2027-01-17","2027-01-24","2027-02-09","A"],["2027-01-11","周一","83","新知识点","尿的生成和排出","抗利尿激素与醛固酮的调节","第八章 第四节 尿的生成和排出","比较两者的刺激因素与作用靶点","ADH由下丘脑视上核与室旁核合成、神经垂体释放，刺激为血浆晶体渗透压升高与血容量减少，作用为集合管水重吸收；醛固酮由球状带分泌，刺激为肾素-血管紧张素Ⅱ、血K+升高，作用为远曲小管保钠排钾","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-01-12","2027-01-14","2027-01-18","2027-01-25","2027-02-10","A"],["2027-01-12","周二","84","复盘日","综合","复盘：近端小管的重吸收、髓袢与逆流倍增机制、远曲小管与集合管的重吸收与分泌、尿液的浓缩与稀释、抗利尿激素与醛固酮的调节","复盘/模考","闭卷复述并重做本轮5个知识点卡片","复述不出的条目当天回读精讲，并标记为薄弱点","① 重做本轮5个知识点卡片；② 复述不出的条目回读精讲；③ 标记薄弱点","—","—","—","—","—","—","A"],["2027-01-13","周三","85","新知识点","尿的生成和排出","排尿反射与膀胱功能","第八章 第四节 尿的生成和排出","说明排尿反射的神经通路与脊休克表现","膀胱充盈牵张感受器、盆神经传入、骶髓初级排尿中枢、副交感传出使逼尿肌收缩与内括约肌舒张；高位中枢可抑制；骶髓损伤后出现尿失禁","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-01-14","2027-01-16","2027-01-20","2027-01-27","2027-02-12","A"],["2027-01-14","周四","86","新知识点","感觉器官","感受器的一般生理特性","第九章 第一节 感受器的一般生理特性","列出适宜刺激、换能、编码、适应四个特性","每种感受器有适宜刺激；换能即把刺激能量转为感受器电位；适应有快慢之分，痛觉感受器几乎不适应","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-01-15","2027-01-17","2027-01-21","2027-01-28","2027-02-13","B"],["2027-01-15","周五","87","新知识点","感觉器官","眼的折光系统与视近调节","第九章 第二节 视觉","说明折光异常与视近反射三要素","近视用凹透镜、远视用凸透镜、散光用柱镜；视近时晶状体变凸（调节）、瞳孔缩小、双眼会聚；老视由晶状体弹性下降致调节力减弱","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-01-16","2027-01-18","2027-01-22","2027-01-29","2027-02-14","A"],["2027-01-16","周六","88","新知识点","感觉器官","眼的感光换能与视觉二元学说","第九章 第二节 视觉","区分视杆与视锥细胞功能及暗适应机制","视杆细胞含视紫红质、感弱光无色觉、暗适应依赖视紫红质合成；视锥细胞感强光与色觉；视紫红质由视蛋白与11-顺视黄醛构成，缺乏维生素A致夜盲","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-01-17","2027-01-19","2027-01-23","2027-01-30","2027-02-15","A"],["2027-01-17","周日","89","新知识点","感觉器官","视力、视野与色觉","第九章 第二节 视觉","说明视力定义、视野范围与三原色学说","视力为分辨两点最小距离的能力，用视角表示；视野颞侧较大、上侧较小；色觉三原色学说以红绿蓝三种视锥为基础","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-01-18","2027-01-20","2027-01-24","2027-01-31","2027-02-16","A"],["2027-01-18","周一","90","复盘日","综合","复盘：排尿反射与膀胱功能、感受器的一般生理特性、眼的折光系统与视近调节、眼的感光换能与视觉二元学说、视力、视野与色觉","复盘/模考","闭卷复述并重做本轮5个知识点卡片","复述不出的条目当天回读精讲，并标记为薄弱点","① 重做本轮5个知识点卡片；② 复述不出的条目回读精讲；③ 标记薄弱点","—","—","—","—","—","—","A"],["2027-01-19","周二","91","新知识点","感觉器官","耳的听觉功能","第九章 第三节 听觉","区分传音与感音、说明行波理论与耳蜗微音器电位","中耳增压减振，咽鼓管平衡压力；感音换能部位在耳蜗基底膜螺旋器；高频声波在蜗底、低频在蜗顶共振；耳蜗微音器电位无阈值、无不应期、可跟随声波频率","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-01-20","2027-01-22","2027-01-26","2027-02-02","2027-02-18","A"],["2027-01-20","周三","92","新知识点","感觉器官","前庭器官与平衡觉","第九章 第四节 前庭器官的功能","说明半规管与囊斑的适宜刺激","半规管感受旋转变速运动，壶腹嵴为感受装置；椭圆囊与球囊感受直线变速与头位变化，囊斑耳石为感受装置；前庭反应含姿势调节、自主神经反应与眼震颤","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-01-21","2027-01-23","2027-01-27","2027-02-03","2027-02-19","B"],["2027-01-21","周四","93","新知识点","神经系统","神经元与突触传递","第十章 第一节 神经系统功能活动的基本原理","说明化学突触传递过程与特征","突触前膜去极、Ca2+内流、递质释放、与受体结合产生突触后电位；特征：单向传递、突触延搁、总和、对内外环境敏感、易疲劳","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-01-22","2027-01-24","2027-01-28","2027-02-04","2027-02-20","A"],["2027-01-22","周五","94","新知识点","神经系统","神经递质与受体","第十章 第一节 神经系统功能活动的基本原理","区分递质与调质、主要递质系统与受体类型","递质须具备合成、储存、释放、受体与失活五条件；乙酰胆碱、去甲肾上腺素、多巴胺、5-羟色胺、谷氨酸（兴奋性）、GABA与甘氨酸（抑制性）；受体分离子通道型与G蛋白耦联型","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-01-23","2027-01-25","2027-01-29","2027-02-05","2027-02-21","A"],["2027-01-23","周六","95","新知识点","神经系统","突触后电位与突触前抑制","第十章 第一节 神经系统功能活动的基本原理","说明EPSP与IPSP形成机制及突触前抑制特点","EPSP由Na+内流为主引起去极；IPSP由Cl-内流为主引起超极；突触前抑制通过轴突-轴突突触使末梢递质释放减少，潜伏期长、持续时间久","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-01-24","2027-01-26","2027-01-30","2027-02-06","2027-02-22","A"],["2027-01-24","周日","96","复盘日","综合","复盘：耳的听觉功能、前庭器官与平衡觉、神经元与突触传递、神经递质与受体、突触后电位与突触前抑制","复盘/模考","闭卷复述并重做本轮5个知识点卡片","复述不出的条目当天回读精讲，并标记为薄弱点","① 重做本轮5个知识点卡片；② 复述不出的条目回读精讲；③ 标记薄弱点","—","—","—","—","—","—","A"],["2027-01-25","周一","97","新知识点","神经系统","反射与中枢整合","第十章 第一节 神经系统功能活动的基本原理","说明反射弧组成与中枢整合的辐散、聚合、环路形式","反射弧含感受器、传入神经、中枢、传出神经、效应器；中枢整合形式：辐散、聚合、反馈环路、链锁状联系；反射时与中枢突触数目相关","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-01-26","2027-01-28","2027-02-01","2027-02-08","2027-02-24","B"],["2027-01-26","周二","98","新知识点","神经系统","感觉投射系统","第十章 第二节 神经系统的感觉分析功能","区分特异性与非特异性投射系统的特点与功能","特异性投射经三级神经元、点对点投射至皮层特定区，引起特定感觉并激发皮层发放；非特异性投射经脑干网状结构弥散投射至皮层广泛区，维持觉醒","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-01-27","2027-01-29","2027-02-02","2027-02-09","2027-02-25","A"],["2027-01-27","周三","99","新知识点","神经系统","牵涉痛","第十章 第二节 神经系统的感觉分析功能","说明牵涉痛的机制与常见对应关系","内脏痛觉传入与体表传入在脊髓同一后角神经元汇聚（会聚学说）；心肌缺血牵涉至心前区与左臂内侧、胆囊炎牵涉至右肩胛、阑尾炎牵涉至脐周","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-01-28","2027-01-30","2027-02-03","2027-02-10","2027-02-26","A"],["2027-01-28","周四","100","新知识点","神经系统","脊髓反射与肌牵张反射","第十章 第三节 神经系统对躯体运动的调节","说明牵张反射两种类型与反射弧特点","腱反射为快速牵拉引起的单突触反射（膝跳反射）；肌紧张为缓慢持续牵拉引起的多突触反射，是维持姿势的基础；反射弧受损则腱反射消失、肌张力降低","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-01-29","2027-01-31","2027-02-04","2027-02-11","2027-02-27","A"],["2027-01-29","周五","101","新知识点","神经系统","脑干对肌紧张的调节与去大脑僵直","第十章 第三节 神经系统对躯体运动的调节","解释去大脑僵直的产生机制与表现","在中脑上、下丘之间切断脑干，伸肌紧张亢进呈角弓反张；机制为易化区活动相对占优势，属γ僵直与α僵直；说明脑干对肌紧张的双重调节","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-01-30","2027-02-01","2027-02-05","2027-02-12","2027-02-28","A"],["2027-01-30","周六","102","复盘日","综合","复盘：反射与中枢整合、感觉投射系统、牵涉痛、脊髓反射与肌牵张反射、脑干对肌紧张的调节与去大脑僵直","复盘/模考","闭卷复述并重做本轮5个知识点卡片","复述不出的条目当天回读精讲，并标记为薄弱点","① 重做本轮5个知识点卡片；② 复述不出的条目回读精讲；③ 标记薄弱点","—","—","—","—","—","—","A"],["2027-01-31","周日","103","新知识点","神经系统","基底神经节与小脑的功能","第十章 第三节 神经系统对躯体运动的调节","区分帕金森病与舞蹈病的病变部位与递质改变","帕金森病为黑质多巴胺能神经元受损、纹状体ACh活动相对亢进，表现为肌紧张增高与静止性震颤；舞蹈病为纹状体GABA能神经元受损，表现为肌张力降低与不自主运动","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-02-01","2027-02-03","2027-02-07","2027-02-14","2027-03-02","A"],["2027-02-01","周一","104","新知识点","神经系统","自主神经系统的功能与递质","第十章 第四节 神经系统对内脏活动的调节","说明交感与副交感双重支配的拮抗统一及受体阻断剂","交感兴奋时心率加快、血压升高、瞳孔扩大、消化抑制；副交感相反；阿托品阻断M受体、酚妥拉明阻断α受体、普萘洛尔阻断β受体","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-02-02","2027-02-04","2027-02-08","2027-02-15","2027-03-03","A"],["2027-02-02","周二","105","新知识点","神经系统","下丘脑的内脏调节功能","第十章 第四节 神经系统对内脏活动的调节","列举下丘脑在体温、水平衡、摄食、情绪与内分泌中的作用","视前区调节体温；视上核与室旁核调节水平衡；外侧区摄食中枢、腹内侧区饱中枢；与情绪和内分泌轴相关","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-02-03","2027-02-05","2027-02-09","2027-02-16","2027-03-04","B"],["2027-02-03","周三","106","新知识点","神经系统","脑电活动与睡眠","第十章 第五节 脑的高级功能","说明脑电波形与睡眠时相特征","清醒安静闭眼时α波、睁眼时β波、睡眠时θ与δ波；慢波睡眠促生长与体力恢复，异相睡眠（REM）与记忆巩固和做梦相关","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-02-04","2027-02-06","2027-02-10","2027-02-17","2027-03-05","A"],["2027-02-04","周四","107","新知识点","神经系统","学习与记忆","第十章 第五节 脑的高级功能","说明记忆分类与突触可塑性机制","记忆分短时与长时，短时与环路活动有关、长时与突触结构改变及蛋白质合成有关；突触可塑性包括长时程增强（LTP）与长时程抑制（LTD），海马是关键结构","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-02-05","2027-02-07","2027-02-11","2027-02-18","2027-03-06","B"],["2027-02-05","周五","108","复盘日","综合","复盘：基底神经节与小脑的功能、自主神经系统的功能与递质、下丘脑的内脏调节功能、脑电活动与睡眠、学习与记忆","复盘/模考","闭卷复述并重做本轮5个知识点卡片","复述不出的条目当天回读精讲，并标记为薄弱点","① 重做本轮5个知识点卡片；② 复述不出的条目回读精讲；③ 标记薄弱点","—","—","—","—","—","—","A"],["2027-02-06","周六","109","新知识点","内分泌","激素的分类与作用机制","第十一章 第一节 内分泌与激素","区分含氮激素与类固醇激素的作用机制","含氮激素多为水溶性、作用于膜受体经第二信使（cAMP、IP3/DG、Ca2+）；类固醇激素为脂溶性、进入细胞与核受体结合调节基因转录，起效慢而持久","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-02-07","2027-02-09","2027-02-13","2027-02-20","2027-03-08","A"],["2027-02-07","周日","110","新知识点","内分泌","下丘脑-垂体轴的调节","第十一章 第二节 下丘脑-垂体内分泌","说明垂体门脉系统与靶腺轴的负反馈","下丘脑释放激素经垂体门脉至腺垂体；腺垂体分泌TSH、ACTH、FSH、LH、GH、PRL；靶腺激素负反馈于下丘脑与垂体；神经垂体释放ADH与催产素","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-02-08","2027-02-10","2027-02-14","2027-02-21","2027-03-09","A"],["2027-02-08","周一","111","新知识点","内分泌","生长激素","第十一章 第二节 下丘脑-垂体内分泌","说明GH的作用、分泌调节与病理表现","GH促生长（经IGF-1）与促代谢（升血糖、促脂解）；睡眠慢波期分泌达高峰；幼年缺乏致侏儒症、过多致巨人症；成年过多致肢端肥大症","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-02-09","2027-02-11","2027-02-15","2027-02-22","2027-03-10","A"],["2027-02-09","周二","112","新知识点","内分泌","甲状腺激素的生理作用","第十一章 第三节 甲状腺内分泌","从代谢、生长发育、系统功能三方面概括","提高基础代谢率与产热；促进脑与骨骼发育（胎儿期缺乏致呆小症）；提高β受体对儿茶酚胺的敏感性，故甲亢见心动过速、脉压增大","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-02-10","2027-02-12","2027-02-16","2027-02-23","2027-03-11","A"],["2027-02-10","周三","113","新知识点","内分泌","甲状腺功能的调节","第十一章 第三节 甲状腺内分泌","说明下丘脑-腺垂体-甲状腺轴的负反馈与自身调节","TRH促TSH、TSH促T3/T4合成释放；T3/T4负反馈抑制TRH与TSH；缺碘时T3/T4减少致TSH升高与甲状腺肿；大剂量碘抑制甲状腺激素释放（Wolff-Chaikoff效应）","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-02-11","2027-02-13","2027-02-17","2027-02-24","2027-03-12","A"],["2027-02-11","周四","114","复盘日","综合","复盘：激素的分类与作用机制、下丘脑-垂体轴的调节、生长激素、甲状腺激素的生理作用、甲状腺功能的调节","复盘/模考","闭卷复述并重做本轮5个知识点卡片","复述不出的条目当天回读精讲，并标记为薄弱点","① 重做本轮5个知识点卡片；② 复述不出的条目回读精讲；③ 标记薄弱点","—","—","—","—","—","—","A"],["2027-02-12","周五","115","新知识点","内分泌","肾上腺皮质激素","第十一章 第四节 肾上腺内分泌","区分球状带、束状带、网状带分泌的激素及应激意义","球状带醛固酮（保钠排钾）、束状带皮质醇（升血糖、抗炎、抗免疫）、网状带性激素；ACTH主要促皮质醇；皮质醇对 CRH 与 ACTH 呈负反馈","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-02-13","2027-02-15","2027-02-19","2027-02-26","2027-03-14","A"],["2027-02-13","周六","116","新知识点","内分泌","胰岛素与胰高血糖素","第十一章 第五节 胰岛内分泌","说明两者对血糖的相反作用及分泌调节","胰岛素由B细胞分泌，促糖摄取利用与糖原合成、抑糖异生，是唯一降血糖激素；胰高血糖素由A细胞分泌，促糖原分解与糖异生；血糖浓度是最重要的调节因素","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-02-14","2027-02-16","2027-02-20","2027-02-27","2027-03-15","A"],["2027-02-14","周日","117","新知识点","内分泌","甲状旁腺激素与钙磷代谢","第十一章 第六节 甲状旁腺内分泌","比较PTH、降钙素与维生素D对钙磷的作用","PTH升血钙降血磷（促骨吸收、促肾小管重吸收钙、促1,25-(OH)2-D3生成）；降钙素降血钙降血磷；维生素D促肠钙吸收与骨钙化","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-02-15","2027-02-17","2027-02-21","2027-02-28","2027-03-16","A"],["2027-02-15","周一","118","新知识点","生殖","男性生殖功能","第十二章 第一节 男性生殖","说明睾酮的作用与下丘脑-垂体-睾丸轴","睾酮由间质细胞分泌，维持生精、促男性化与合成代谢；FSH作用于支持细胞促生精，LH促睾酮分泌；睾酮负反馈抑制GnRH与LH","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-02-16","2027-02-18","2027-02-22","2027-03-01","2027-03-17","B"],["2027-02-16","周二","119","新知识点","生殖","卵巢周期与激素","第十二章 第二节 女性生殖","说明卵泡期与黄体期的激素变化及雌激素的双相作用","卵泡期雌激素逐渐升高，排卵前达高峰并正反馈触发LH峰；黄体期孕激素与雌激素均升高；雌激素对LH呈低浓度抑制、高浓度正反馈的双相作用","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-02-17","2027-02-19","2027-02-23","2027-03-02","2027-03-18","A"],["2027-02-17","周三","120","模考日","综合","模考：20题覆盖已学模块","复盘/模考","限时20题，正确率不低于80%","错题按模块归类，正确率低于80%的模块回炉该模块全部卡片","① 限时20题模考；② 错题按模块归类；③ 正确率低于80%的模块回炉","—","—","—","—","—","—","A"],["2027-02-18","周四","121","新知识点","生殖","月经周期","第十二章 第二节 女性生殖","按月经期、增生期、分泌期对应卵巢与子宫内膜变化","月经期因黄体萎缩、雌孕激素骤降致内膜脱落出血；增生期受雌激素作用内膜增厚；分泌期受孕激素作用腺体分泌、为着床准备；周期约28天","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-02-19","2027-02-21","2027-02-25","2027-03-04","2027-03-20","A"],["2027-02-19","周五","122","新知识点","生殖","妊娠与分娩的内分泌调节","第十二章 第二节 女性生殖","说明hCG、hPL与分娩启动的相关因素","受精后滋养层分泌hCG维持黄体、8至10周达峰；hPL促乳腺发育与胎儿生长；分娩启动与子宫肌兴奋性升高、缩宫素与前列腺素、胎膜与宫颈成熟相关；哺乳期吸吮抑制GnRH致闭经","① 精读当日精讲并闭卷复述；② 完成3题自测并核对解析；③ 用费曼法向同学复述2分钟","D1、D3、D7、D14、D30","2027-02-20","2027-02-22","2027-02-26","2027-03-05","2027-03-21","A"],["2027-02-20","周六","123","复盘日","综合","复盘：甲状旁腺激素与钙磷代谢、男性生殖功能、卵巢周期与激素、月经周期、妊娠与分娩的内分泌调节","复盘/模考","闭卷复述并重做本轮5个知识点卡片","复述不出的条目当天回读精讲，并标记为薄弱点","① 重做本轮5个知识点卡片；② 复述不出的条目回读精讲；③ 标记薄弱点","—","—","—","—","—","—","A"]],"cards":[{"f":"请复述「生理学的研究对象与研究方法」的必掌握判别要点","b":"急性动物实验含在体与离体；慢性实验可观察清醒状态整体功能；三层水平是同一问题的不同尺度","t":"生理学 绪论 B必掌握","c":"第一章 第一节 生理学的研究内容和方法"},{"f":"请复述「内环境与稳态」的必掌握判别要点","b":"内环境指细胞外液；稳态是理化性质在微小波动中的动态平衡，不是恒定不变；负反馈是其维持机制","t":"生理学 绪论 A必掌握","c":"第一章 第二节 机体的内环境"},{"f":"请复述「生理功能的调节方式」的必掌握判别要点","b":"神经调节快准短、占主导；体液调节慢广久；自身调节不依赖神经体液，如心肌异长自身调节、肾血流自身调节","t":"生理学 绪论 A必掌握","c":"第一章 第三节 机体生理功能的调节"},{"f":"请复述「反馈控制与前馈」的必掌握判别要点","b":"负反馈：压力感受性反射、体温调节；正反馈：分娩、排尿、凝血、动作电位Na+内流；前馈：进食前胃液分泌","t":"生理学 绪论 A必掌握","c":"第一章 第三节 体内的控制系统"},{"f":"请复述「细胞膜的结构与跨膜转运总览」的必掌握判别要点","b":"脂溶性小分子单纯扩散；水与水溶性小分子经通道或载体；逆浓度梯度需耗能者为主动转运","t":"生理学 细胞的基本功能 B必掌握","c":"第二章 第一节 细胞膜的结构和物质转运功能"},{"f":"请复述「单纯扩散与易化扩散」的必掌握判别要点","b":"易化扩散有结构特异性、饱和现象、竞争性抑制；通道有门控与离子选择性；单纯扩散无饱和","t":"生理学 细胞的基本功能 A必掌握","c":"第二章 第一节 细胞膜的结构和物质转运功能"},{"f":"请复述「原发性主动转运：钠泵」的必掌握判别要点","b":"Na+-K+-ATP酶，每分解1分子ATP移出3个Na+、移入2个K+；意义：维持离子梯度、构成RP基础、为继发性主动转运供能、调节细胞体积","t":"生理学 细胞的基本功能 A必掌握","c":"第二章 第一节 细胞膜的结构和物质转运功能"},{"f":"请复述「继发性主动转运与膜泡运输」的必掌握判别要点","b":"肠上皮与肾小管葡萄糖、氨基酸转运依赖钠泵建立的Na+梯度；出胞入胞转运大分子，需耗能，Ca2+依赖的囊泡融合","t":"生理学 细胞的基本功能 B必掌握","c":"第二章 第一节 细胞膜的结构和物质转运功能"},{"f":"请复述「静息电位及其产生机制」的必掌握判别要点","b":"骨骼肌约-90mV、神经细胞约-70mV；主要由K+外流达到电化学平衡决定，安静时膜对K+通透性最高；钠泵生电作用参与少量","t":"生理学 细胞的基本功能 A必掌握","c":"第二章 第二节 细胞的生物电现象"},{"f":"请复述「动作电位的波形与离子机制」的必掌握判别要点","b":"去极相由Na+内流（电压门控钠通道开放）形成；复极相由K+外流形成；锋电位是主要标志，具全或无特性","t":"生理学 细胞的基本功能 A必掌握","c":"第二章 第二节 细胞的生物电现象"},{"f":"请复述「动作电位的传导与局部电位」的必掌握判别要点","b":"AP不衰减、全或无、有不应期，无髓纤维连续传导、有髓纤维跳跃式传导；局部电位随距离衰减、可总和、无不应期","t":"生理学 细胞的基本功能 A必掌握","c":"第二章 第二节 细胞的生物电现象"},{"f":"请复述「阈电位、阈刺激与兴奋性」的必掌握判别要点","b":"阈电位与RP差距越小兴奋性越高；兴奋后经历绝对不应期、相对不应期、超常期、低常期；绝对不应期决定AP最高频率","t":"生理学 细胞的基本功能 A必掌握","c":"第二章 第二节 细胞的生物电现象"},{"f":"请复述「神经-骨骼肌接头兴奋传递」的必掌握判别要点","b":"AP到达末梢、Ca2+内流、ACh囊泡释放、结合终板膜N2受体、终板电位、肌膜AP；ACh被胆碱酯酶水解；箭毒阻断受体、新斯的明抑制酶","t":"生理学 细胞的基本功能 A必掌握","c":"第二章 第三节 肌细胞的收缩功能"},{"f":"请复述「骨骼肌收缩的滑行学说与兴奋-收缩耦联」的必掌握判别要点","b":"细肌丝向M线滑行、肌节缩短，粗肌丝长度不变；耦联三环节：肌膜AP经T管传入、三联管处Ca2+释放、Ca2+与肌钙蛋白结合触发横桥周期；Ca2+是耦联因子","t":"生理学 细胞的基本功能 A必掌握","c":"第二章 第三节 肌细胞的收缩功能"},{"f":"请复述「肌肉收缩的力学表现」的必掌握判别要点","b":"等长收缩张力增而长度不变，等张收缩长度缩短而张力不变；前负荷决定初长度（异长自身调节），后负荷增大则缩短速度减慢、做功先增后减","t":"生理学 细胞的基本功能 B必掌握","c":"第二章 第三节 肌细胞的收缩功能"},{"f":"请复述「血液的组成与理化特性」的必掌握判别要点","b":"血浆蛋白：白蛋白维持胶体渗透压、球蛋白参与免疫与运输、纤维蛋白原参与凝血；血浆pH 7.35至7.45，渗透压约300mOsm/(kg·H2O)","t":"生理学 血液 B必掌握","c":"第三章 第一节 血液的组成和理化特性"},{"f":"请复述「血浆渗透压与红细胞的渗透脆性」的必掌握判别要点","b":"晶体渗透压占绝大部分、主要维持细胞内外水平衡；胶体渗透压由白蛋白形成、维持血管内外水平衡；低渗液致红细胞膨胀破裂，高渗致皱缩","t":"生理学 血液 A必掌握","c":"第三章 第一节 血液的组成和理化特性"},{"f":"请复述「红细胞生理与生成的调节」的必掌握判别要点","b":"成年男性(4.5至5.5)×10^12/L，寿命约120天，衰老在脾破坏；生成需铁、叶酸、维生素B12、蛋白质；缺氧经肾产生EPO促红系增殖分化","t":"生理学 血液 A必掌握","c":"第三章 第二节 血细胞生理"},{"f":"请复述「白细胞与血小板生理」的必掌握判别要点","b":"中性粒细胞占比最高、参与急性化脓性感染；血小板参与止血第一相（黏附、聚集、释放），正常(100至300)×10^9/L","t":"生理学 血液 B必掌握","c":"第三章 第二节 血细胞生理"},{"f":"请复述「生理性止血的基本过程」的必掌握判别要点","b":"血管收缩、血小板血栓形成（一期止血）、血液凝固（二期止血）；出血时间反映血小板与血管功能，凝血时间反映凝血因子","t":"生理学 血液 A必掌握","c":"第三章 第三节 生理性止血"},{"f":"请复述「血液凝固的机制与途径」的必掌握判别要点","b":"多数凝血因子为蛋白酶原、需维生素K参与（Ⅱ、Ⅶ、Ⅸ、Ⅹ）；内源由Ⅻ接触激活启动，外源由组织因子启动，二者在Ⅹ因子激活处汇合，共同通路为凝血酶原转凝血酶再形成纤维蛋白","t":"生理学 血液 A必掌握","c":"第三章 第三节 生理性止血"},{"f":"请复述「抗凝系统与纤维蛋白溶解」的必掌握判别要点","b":"抗凝血酶Ⅲ、蛋白质C系统、组织因子途径抑制物；纤溶：纤溶酶原经激活物转为纤溶酶，降解纤维蛋白；肝素增强抗凝血酶Ⅲ活性","t":"生理学 血液 B必掌握","c":"第三章 第三节 生理性止血"},{"f":"请复述「ABO血型系统」的必掌握判别要点","b":"A型红细胞含A抗原、血清含抗B；B型含B抗原、抗A；AB型含A和B抗原、无抗体；O型无抗原、含抗A抗B；天然抗体为IgM，不能通过胎盘","t":"生理学 血液 A必掌握","c":"第三章 第四节 血型和输血原则"},{"f":"请复述「Rh血型与输血原则」的必掌握判别要点","b":"Rh抗原以D抗原性最强；Rh阴性者第二次接受Rh阳性血可发生溶血；母Rh阴性、胎Rh阳性时IgG抗体通过胎盘致新生儿溶血；输血须同型且交叉配血","t":"生理学 血液 A必掌握","c":"第三章 第四节 血型和输血原则"},{"f":"请复述「心肌细胞的分类与电生理特性」的必掌握判别要点","b":"工作细胞（心房肌、心室肌）无自律性；自律细胞（窦房结、浦肯野）有4期自动去极；快反应细胞0期由Na+内流，慢反应细胞0期由Ca2+内流","t":"生理学 血液循环 B必掌握","c":"第四章 第一节 心脏的泵血功能"},{"f":"请复述「心室肌细胞动作电位各期机制」的必掌握判别要点","b":"0期Na+内流；1期K+外流；2期平台Ca2+内流与K+外流平衡，是AP时程长、不出现强直收缩的原因；3期K+外流；4期钠泵与Na+-Ca2+交换恢复","t":"生理学 血液循环 A必掌握","c":"第四章 第一节 心脏的泵血功能"},{"f":"请复述「窦房结细胞电位与心肌自律性」的必掌握判别要点","b":"窦房结P细胞4期由K+外流衰减、If钠内流、T型钙通道激活共同形成；最大复极电位绝对值小、阈电位约-40mV，故自律性最高，为正常起搏点","t":"生理学 血液循环 A必掌握","c":"第四章 第一节 心脏的泵血功能"},{"f":"请复述「心肌兴奋性、期前收缩与代偿间歇」的必掌握判别要点","b":"心肌有效不应期特别长（含平台期），故不发生强直收缩；有效不应期后给予额外刺激可产生期前收缩，其后窦性冲动落在不应期而出现代偿间歇","t":"生理学 血液循环 A必掌握","c":"第四章 第一节 心脏的泵血功能"},{"f":"请复述「心肌的传导性与收缩性特点」的必掌握判别要点","b":"房室结传导最慢（房室延搁，保证房先于室收缩）；浦肯野纤维最快；心肌收缩依赖细胞外Ca2+，呈全或无式同步收缩","t":"生理学 血液循环 B必掌握","c":"第四章 第一节 心脏的泵血功能"},{"f":"请复述「心动周期与心脏泵血过程」的必掌握判别要点","b":"等容收缩期室内压升高最快、两瓣均关闭；快速射血期室内压最高、主动脉压降至最低点；等容舒张期室内压下降最快；心房收缩贡献约25%充盈","t":"生理学 血液循环 A必掌握","c":"第四章 第一节 心脏的泵血功能"},{"f":"请复述「心输出量及其影响因素」的必掌握判别要点","b":"每搏量为舒张末期容积减收缩末期容积；心输出量为每搏量乘心率；前负荷（异长自身调节）、后负荷（动脉压）、收缩能力（等长调节）、心率过快时因充盈不足反而下降","t":"生理学 血液循环 A必掌握","c":"第四章 第一节 心脏的泵血功能"},{"f":"请复述「心音与心功能评价」的必掌握判别要点","b":"第一心音房室瓣关闭、标志心室收缩开始；第二心音半月瓣关闭；第三心音快速充盈期；第四心音心房收缩；射血分数正常不低于55%","t":"生理学 血液循环 B必掌握","c":"第四章 第一节 心脏的泵血功能"},{"f":"请复述「动脉血压与影响因素」的必掌握判别要点","b":"形成条件：循环系统充盈、心脏射血、外周阻力、大动脉弹性；影响因素：每搏量（收缩压为主）、心率、外周阻力（舒张压为主）、大动脉弹性、循环血量与血管容量比","t":"生理学 血液循环 A必掌握","c":"第四章 第二节 血管生理"},{"f":"请复述「微循环与组织液生成」的必掌握判别要点","b":"微循环通路：迂回通路（物质交换）、直捷通路（回流）、动静脉短路（体温调节）；有效滤过压等于毛细血管压加组织液胶体渗透压，减去血浆胶体渗透压与组织液静水压","t":"生理学 血液循环 A必掌握","c":"第四章 第二节 血管生理"},{"f":"请复述「静脉血压与静脉回流」的必掌握判别要点","b":"中心静脉压反映心脏射血能力与血容量；影响因素：体循环平均充盈压、心脏收缩力、体位改变、骨骼肌泵、呼吸泵","t":"生理学 血液循环 B必掌握","c":"第四章 第二节 血管生理"},{"f":"请复述「心血管活动的神经调节」的必掌握判别要点","b":"颈动脉窦与主动脉弓压力感受器、舌咽与迷走神经、延髓孤束核、心迷走与心交感及缩血管中枢；血压升高时反射性心率减慢、血管舒张，属负反馈，对波动性血压缓冲最强","t":"生理学 血液循环 A必掌握","c":"第四章 第三节 心血管活动的调节"},{"f":"请复述「心血管活动的体液调节」的必掌握判别要点","b":"肾上腺素对α、β受体均强，心输出量增加、总外周阻力变化不大；去甲肾上腺素主要激动α受体，升压明显、反射性心率减慢；血管紧张素Ⅱ收缩血管并促醛固酮分泌","t":"生理学 血液循环 A必掌握","c":"第四章 第三节 心血管活动的调节"},{"f":"请复述「冠脉循环与脑循环特点」的必掌握判别要点","b":"冠脉血流主要在舒张期、受心肌代谢产物（腺苷）调节；脑循环存在血脑屏障与自身调节，对缺氧和CO2敏感","t":"生理学 血液循环 B必掌握","c":"第四章 第四节 器官循环"},{"f":"请复述「呼吸过程与肺通气原理」的必掌握判别要点","b":"肺通气动力是呼吸肌收缩引起的肺内压与大气压差；平静吸气主动、呼气被动；胸膜腔内压为负压（-5至-10cmH2O），维持肺扩张与静脉回流","t":"生理学 呼吸 A必掌握","c":"第五章 第一节 肺通气"},{"f":"请复述「肺容积与肺容量」的必掌握判别要点","b":"肺活量为潮气量加补吸气量加补呼气量；功能残气量为残气量加补呼气量；残气量不能呼出，阻塞性通气障碍时残气量与肺总量比值升高","t":"生理学 呼吸 A必掌握","c":"第五章 第一节 肺通气"},{"f":"请复述「肺通气功能的评价」的必掌握判别要点","b":"肺泡通气量为潮气量减无效腔气量再乘呼吸频率；浅快呼吸使肺泡通气量显著下降；深慢呼吸可提高肺泡通气效率","t":"生理学 呼吸 A必掌握","c":"第五章 第一节 肺通气"},{"f":"请复述「气体交换与影响因素」的必掌握判别要点","b":"换气动力是分压差；VA/Q正常约0.84，比值增大相当无效腔增大，减小相当功能性分流；肺纤维化使弥散距离增大","t":"生理学 呼吸 A必掌握","c":"第五章 第二节 肺换气和组织换气"},{"f":"请复述「氧的运输与氧解离曲线」的必掌握判别要点","b":"Hb与O2结合呈S形曲线；P50正常约26.5mmHg；右移（pH下降、PCO2升高、温度升高、2,3-DPG增多）利于释氧，左移如低温与库存血时释氧减少","t":"生理学 呼吸 A必掌握","c":"第五章 第三节 气体在血液中的运输"},{"f":"请复述「二氧化碳的运输」的必掌握判别要点","b":"物理溶解约5%、氨基甲酰血红蛋白约7%、HCO3-约88%；碳酸酐酶在红细胞内催化CO2水化；霍尔丹效应指Hb氧合促进CO2释放","t":"生理学 呼吸 A必掌握","c":"第五章 第三节 气体在血液中的运输"},{"f":"请复述「呼吸中枢与呼吸节律的形成」的必掌握判别要点","b":"基本呼吸中枢在延髓；呼吸调整中枢在脑桥；节律起源于延髓前包钦格复合体的起步细胞；大脑皮层可随意控制呼吸","t":"生理学 呼吸 A必掌握","c":"第五章 第四节 呼吸运动的调节"},{"f":"请复述「化学感受性呼吸反射」的必掌握判别要点","b":"中枢化学感受器对H+敏感、对缺氧不敏感；外周颈动脉体与主动脉体对缺氧敏感；CO2是维持呼吸最重要的生理性刺激；缺氧兴奋呼吸的作用弱于CO2","t":"生理学 呼吸 A必掌握","c":"第五章 第四节 呼吸运动的调节"},{"f":"请复述「肺牵张反射与其他呼吸反射」的必掌握判别要点","b":"肺扩张引起吸气抑制（黑伯反射），肺缩小引起吸气兴奋；咳嗽、喷嚏为防御性反射；J感受器参与肺水肿时的呼吸急促","t":"生理学 呼吸 B必掌握","c":"第五章 第四节 呼吸运动的调节"},{"f":"请复述「消化道平滑肌的生理特性」的必掌握判别要点","b":"静息电位不稳定、有基本电节律（慢波）；对机械牵张、温度、化学刺激敏感，对电刺激不敏感","t":"生理学 消化和吸收 B必掌握","c":"第六章 第一节 消化生理概述"},{"f":"请复述「消化系统的神经支配」的必掌握判别要点","b":"内在神经丛（黏膜下与肌间神经丛）构成肠神经系统，可独立完成局部反射；副交感（迷走）促进运动与分泌，交感抑制","t":"生理学 消化和吸收 A必掌握","c":"第六章 第一节 消化生理概述"},{"f":"请复述「胃肠激素」的必掌握判别要点","b":"促胃液素（G细胞）促胃酸分泌与黏膜生长；促胰液素（S细胞）促胰液的水和HCO3-；缩胆囊素（I细胞）促胆囊收缩与胰酶分泌；抑胃肽促胰岛素释放","t":"生理学 消化和吸收 A必掌握","c":"第六章 第一节 消化生理概述"},{"f":"请复述「唾液分泌与咀嚼吞咽」的必掌握判别要点","b":"唾液为低渗液，含唾液淀粉酶、溶菌酶；纯神经反射性调节，副交感促进；吞咽分口腔期（随意）、咽期、食管期","t":"生理学 消化和吸收 B必掌握","c":"第六章 第二节 口腔内消化"},{"f":"请复述「胃液分泌与胃黏膜屏障」的必掌握判别要点","b":"壁细胞H+-K+-ATP酶泌酸，组胺、促胃液素、ACh促分泌，前列腺素与质子泵抑制剂抑制；内因子促维生素B12吸收；头期约30%、胃期约60%、肠期约10%","t":"生理学 消化和吸收 A必掌握","c":"第六章 第三节 胃内消化"},{"f":"请复述「胃的运动与胃排空」的必掌握判别要点","b":"容受性舒张由迷走迷走反射介导；排空速度糖快于蛋白质快于脂肪，受十二指肠反馈（肠胃反射、抑胃肽）抑制；液体排空快","t":"生理学 消化和吸收 A必掌握","c":"第六章 第三节 胃内消化"},{"f":"请复述「胰液的分泌与调节」的必掌握判别要点","b":"胰液含胰淀粉酶、胰脂肪酶、胰蛋白酶原等，是最重要的消化液；促胰液素促水和HCO3-分泌，缩胆囊素促胰酶分泌；胰蛋白酶原由肠激酶激活","t":"生理学 消化和吸收 A必掌握","c":"第六章 第四节 小肠内消化"},{"f":"请复述「胆汁的分泌与胆盐的肠肝循环」的必掌握判别要点","b":"胆汁不含消化酶；胆盐乳化脂肪、形成混合微胶粒、促进脂溶性维生素吸收；95%胆盐在回肠末端重吸收经门静脉回肝","t":"生理学 消化和吸收 A必掌握","c":"第六章 第四节 小肠内消化"},{"f":"请复述「小肠的运动与吸收」的必掌握判别要点","b":"分节运动使食糜与消化液充分混合、增加接触面积；铁在十二指肠、钙在小肠上段、维生素B12在回肠末端、胆盐与脂肪酸在回肠吸收","t":"生理学 消化和吸收 A必掌握","c":"第六章 第四节 小肠内消化"},{"f":"请复述「能量代谢与测定原理」的必掌握判别要点","b":"能量代谢测定基于能量守恒；间接测热法测耗氧量与CO2产量，呼吸商等于CO2产量除以耗氧量；糖呼吸商1.0、脂肪0.71、蛋白质0.80、混合膳食约0.85","t":"生理学 能量代谢与体温 B必掌握","c":"第七章 第一节 能量代谢"},{"f":"请复述「影响能量代谢的因素」的必掌握判别要点","b":"肌肉活动影响最显著；食物特殊动力效应以蛋白质最强（约30%）；环境温度在20至30℃时代谢最稳定","t":"生理学 能量代谢与体温 A必掌握","c":"第七章 第一节 能量代谢"},{"f":"请复述「基础代谢与基础代谢率」的必掌握判别要点","b":"基础状态为清醒、静卧、空腹12小时以上、室温20至25℃；BMR实测值与正常平均值相差超过15%有病理意义；甲亢升高、甲减降低","t":"生理学 能量代谢与体温 A必掌握","c":"第七章 第一节 能量代谢"},{"f":"请复述「体温与体温的正常变动」的必掌握判别要点","b":"体核温度以直肠最高、腋窝最低；清晨2至6时最低、午后最高，波动不超过1℃；女性排卵后体温升高0.3至0.5℃","t":"生理学 能量代谢与体温 A必掌握","c":"第七章 第二节 体温"},{"f":"请复述「机体的产热与散热」的必掌握判别要点","b":"战栗产热来自骨骼肌节律性收缩；非战栗产热来自棕色脂肪组织解偶联；散热方式：辐射、传导、对流、蒸发，环境温度高于皮肤温度时蒸发是唯一途径","t":"生理学 能量代谢与体温 A必掌握","c":"第七章 第二节 体温"},{"f":"请复述「体温调节与调定点学说」的必掌握判别要点","b":"温度敏感神经元在下丘脑视前区-下丘脑前部；调定点由PO/AH设定，发热是调定点上移（致热原使PGE2升高），中暑是调定点未变而散热失效，两者机制不同","t":"生理学 能量代谢与体温 A必掌握","c":"第七章 第二节 体温"},{"f":"请复述「肾血流量的自身调节」的必掌握判别要点","b":"动脉压在80至180mmHg范围内肾血流量保持相对恒定；机制为入球小动脉肌源性收缩与致密斑管球反馈；超出范围则随血压变化","t":"生理学 尿的生成和排出 A必掌握","c":"第八章 第一节 肾的功能解剖和肾血流量"},{"f":"请复述「肾小球滤过与滤过分数」的必掌握判别要点","b":"滤过膜由内皮细胞、基膜、足细胞裂孔膜构成；有效滤过压为肾小球毛细血管压减血浆胶体渗透压减囊内压；滤过分数约19%，正常滤过率125ml/min","t":"生理学 尿的生成和排出 A必掌握","c":"第八章 第二节 肾小球的滤过功能"},{"f":"请复述「影响肾小球滤过的因素」的必掌握判别要点","b":"肾小球毛细血管压升高滤过增加；血浆胶体渗透压升高（大量输血浆代用品）滤过减少；囊内压升高（结石、肿瘤）滤过减少；滤过膜面积减小或通透性增大分别致少尿与蛋白尿","t":"生理学 尿的生成和排出 A必掌握","c":"第八章 第二节 肾小球的滤过功能"},{"f":"请复述「近端小管的重吸收」的必掌握判别要点","b":"近端小管重吸收约65%至70%的Na+与水，葡萄糖、氨基酸全部重吸收；葡萄糖重吸收有极限，肾糖阈约180mg/dl；为等渗性重吸收","t":"生理学 尿的生成和排出 A必掌握","c":"第八章 第三节 肾小管和集合管的物质转运功能"},{"f":"请复述「髓袢与逆流倍增机制」的必掌握判别要点","b":"降支细段对水通透、对NaCl不通透；升支粗段主动重吸收NaCl而对水不通透，形成髓质渗透梯度；直小血管以逆流交换维持梯度","t":"生理学 尿的生成和排出 A必掌握","c":"第八章 第三节 肾小管和集合管的物质转运功能"},{"f":"请复述「远曲小管与集合管的重吸收与分泌」的必掌握判别要点","b":"远曲小管与集合管重吸收约10%Na+，受醛固酮调节；Na+重吸收增多促进K+分泌（钠钾交换），K+与H+分泌存在竞争；H+分泌与HCO3-重吸收耦联","t":"生理学 尿的生成和排出 A必掌握","c":"第八章 第三节 肾小管和集合管的物质转运功能"},{"f":"请复述「尿液的浓缩与稀释」的必掌握判别要点","b":"ADH促进集合管对水通透，水在髓质高渗区被重吸收形成浓缩尿；缺乏ADH时排出稀释尿；髓袢结构是形成梯度的基础","t":"生理学 尿的生成和排出 A必掌握","c":"第八章 第四节 尿的生成和排出"},{"f":"请复述「抗利尿激素与醛固酮的调节」的必掌握判别要点","b":"ADH由下丘脑视上核与室旁核合成、神经垂体释放，刺激为血浆晶体渗透压升高与血容量减少，作用为集合管水重吸收；醛固酮由球状带分泌，刺激为肾素-血管紧张素Ⅱ、血K+升高，作用为远曲小管保钠排钾","t":"生理学 尿的生成和排出 A必掌握","c":"第八章 第四节 尿的生成和排出"},{"f":"请复述「排尿反射与膀胱功能」的必掌握判别要点","b":"膀胱充盈牵张感受器、盆神经传入、骶髓初级排尿中枢、副交感传出使逼尿肌收缩与内括约肌舒张；高位中枢可抑制；骶髓损伤后出现尿失禁","t":"生理学 尿的生成和排出 A必掌握","c":"第八章 第四节 尿的生成和排出"},{"f":"请复述「感受器的一般生理特性」的必掌握判别要点","b":"每种感受器有适宜刺激；换能即把刺激能量转为感受器电位；适应有快慢之分，痛觉感受器几乎不适应","t":"生理学 感觉器官 B必掌握","c":"第九章 第一节 感受器的一般生理特性"},{"f":"请复述「眼的折光系统与视近调节」的必掌握判别要点","b":"近视用凹透镜、远视用凸透镜、散光用柱镜；视近时晶状体变凸（调节）、瞳孔缩小、双眼会聚；老视由晶状体弹性下降致调节力减弱","t":"生理学 感觉器官 A必掌握","c":"第九章 第二节 视觉"},{"f":"请复述「眼的感光换能与视觉二元学说」的必掌握判别要点","b":"视杆细胞含视紫红质、感弱光无色觉、暗适应依赖视紫红质合成；视锥细胞感强光与色觉；视紫红质由视蛋白与11-顺视黄醛构成，缺乏维生素A致夜盲","t":"生理学 感觉器官 A必掌握","c":"第九章 第二节 视觉"},{"f":"请复述「视力、视野与色觉」的必掌握判别要点","b":"视力为分辨两点最小距离的能力，用视角表示；视野颞侧较大、上侧较小；色觉三原色学说以红绿蓝三种视锥为基础","t":"生理学 感觉器官 A必掌握","c":"第九章 第二节 视觉"},{"f":"请复述「耳的听觉功能」的必掌握判别要点","b":"中耳增压减振，咽鼓管平衡压力；感音换能部位在耳蜗基底膜螺旋器；高频声波在蜗底、低频在蜗顶共振；耳蜗微音器电位无阈值、无不应期、可跟随声波频率","t":"生理学 感觉器官 A必掌握","c":"第九章 第三节 听觉"},{"f":"请复述「前庭器官与平衡觉」的必掌握判别要点","b":"半规管感受旋转变速运动，壶腹嵴为感受装置；椭圆囊与球囊感受直线变速与头位变化，囊斑耳石为感受装置；前庭反应含姿势调节、自主神经反应与眼震颤","t":"生理学 感觉器官 B必掌握","c":"第九章 第四节 前庭器官的功能"},{"f":"请复述「神经元与突触传递」的必掌握判别要点","b":"突触前膜去极、Ca2+内流、递质释放、与受体结合产生突触后电位；特征：单向传递、突触延搁、总和、对内外环境敏感、易疲劳","t":"生理学 神经系统 A必掌握","c":"第十章 第一节 神经系统功能活动的基本原理"},{"f":"请复述「神经递质与受体」的必掌握判别要点","b":"递质须具备合成、储存、释放、受体与失活五条件；乙酰胆碱、去甲肾上腺素、多巴胺、5-羟色胺、谷氨酸（兴奋性）、GABA与甘氨酸（抑制性）；受体分离子通道型与G蛋白耦联型","t":"生理学 神经系统 A必掌握","c":"第十章 第一节 神经系统功能活动的基本原理"},{"f":"请复述「突触后电位与突触前抑制」的必掌握判别要点","b":"EPSP由Na+内流为主引起去极；IPSP由Cl-内流为主引起超极；突触前抑制通过轴突-轴突突触使末梢递质释放减少，潜伏期长、持续时间久","t":"生理学 神经系统 A必掌握","c":"第十章 第一节 神经系统功能活动的基本原理"},{"f":"请复述「反射与中枢整合」的必掌握判别要点","b":"反射弧含感受器、传入神经、中枢、传出神经、效应器；中枢整合形式：辐散、聚合、反馈环路、链锁状联系；反射时与中枢突触数目相关","t":"生理学 神经系统 B必掌握","c":"第十章 第一节 神经系统功能活动的基本原理"},{"f":"请复述「感觉投射系统」的必掌握判别要点","b":"特异性投射经三级神经元、点对点投射至皮层特定区，引起特定感觉并激发皮层发放；非特异性投射经脑干网状结构弥散投射至皮层广泛区，维持觉醒","t":"生理学 神经系统 A必掌握","c":"第十章 第二节 神经系统的感觉分析功能"},{"f":"请复述「牵涉痛」的必掌握判别要点","b":"内脏痛觉传入与体表传入在脊髓同一后角神经元汇聚（会聚学说）；心肌缺血牵涉至心前区与左臂内侧、胆囊炎牵涉至右肩胛、阑尾炎牵涉至脐周","t":"生理学 神经系统 A必掌握","c":"第十章 第二节 神经系统的感觉分析功能"},{"f":"请复述「脊髓反射与肌牵张反射」的必掌握判别要点","b":"腱反射为快速牵拉引起的单突触反射（膝跳反射）；肌紧张为缓慢持续牵拉引起的多突触反射，是维持姿势的基础；反射弧受损则腱反射消失、肌张力降低","t":"生理学 神经系统 A必掌握","c":"第十章 第三节 神经系统对躯体运动的调节"},{"f":"请复述「脑干对肌紧张的调节与去大脑僵直」的必掌握判别要点","b":"在中脑上、下丘之间切断脑干，伸肌紧张亢进呈角弓反张；机制为易化区活动相对占优势，属γ僵直与α僵直；说明脑干对肌紧张的双重调节","t":"生理学 神经系统 A必掌握","c":"第十章 第三节 神经系统对躯体运动的调节"},{"f":"请复述「基底神经节与小脑的功能」的必掌握判别要点","b":"帕金森病为黑质多巴胺能神经元受损、纹状体ACh活动相对亢进，表现为肌紧张增高与静止性震颤；舞蹈病为纹状体GABA能神经元受损，表现为肌张力降低与不自主运动","t":"生理学 神经系统 A必掌握","c":"第十章 第三节 神经系统对躯体运动的调节"},{"f":"请复述「自主神经系统的功能与递质」的必掌握判别要点","b":"交感兴奋时心率加快、血压升高、瞳孔扩大、消化抑制；副交感相反；阿托品阻断M受体、酚妥拉明阻断α受体、普萘洛尔阻断β受体","t":"生理学 神经系统 A必掌握","c":"第十章 第四节 神经系统对内脏活动的调节"},{"f":"请复述「下丘脑的内脏调节功能」的必掌握判别要点","b":"视前区调节体温；视上核与室旁核调节水平衡；外侧区摄食中枢、腹内侧区饱中枢；与情绪和内分泌轴相关","t":"生理学 神经系统 B必掌握","c":"第十章 第四节 神经系统对内脏活动的调节"},{"f":"请复述「脑电活动与睡眠」的必掌握判别要点","b":"清醒安静闭眼时α波、睁眼时β波、睡眠时θ与δ波；慢波睡眠促生长与体力恢复，异相睡眠（REM）与记忆巩固和做梦相关","t":"生理学 神经系统 A必掌握","c":"第十章 第五节 脑的高级功能"},{"f":"请复述「学习与记忆」的必掌握判别要点","b":"记忆分短时与长时，短时与环路活动有关、长时与突触结构改变及蛋白质合成有关；突触可塑性包括长时程增强（LTP）与长时程抑制（LTD），海马是关键结构","t":"生理学 神经系统 B必掌握","c":"第十章 第五节 脑的高级功能"},{"f":"请复述「激素的分类与作用机制」的必掌握判别要点","b":"含氮激素多为水溶性、作用于膜受体经第二信使（cAMP、IP3/DG、Ca2+）；类固醇激素为脂溶性、进入细胞与核受体结合调节基因转录，起效慢而持久","t":"生理学 内分泌 A必掌握","c":"第十一章 第一节 内分泌与激素"},{"f":"请复述「下丘脑-垂体轴的调节」的必掌握判别要点","b":"下丘脑释放激素经垂体门脉至腺垂体；腺垂体分泌TSH、ACTH、FSH、LH、GH、PRL；靶腺激素负反馈于下丘脑与垂体；神经垂体释放ADH与催产素","t":"生理学 内分泌 A必掌握","c":"第十一章 第二节 下丘脑-垂体内分泌"},{"f":"请复述「生长激素」的必掌握判别要点","b":"GH促生长（经IGF-1）与促代谢（升血糖、促脂解）；睡眠慢波期分泌达高峰；幼年缺乏致侏儒症、过多致巨人症；成年过多致肢端肥大症","t":"生理学 内分泌 A必掌握","c":"第十一章 第二节 下丘脑-垂体内分泌"},{"f":"请复述「甲状腺激素的生理作用」的必掌握判别要点","b":"提高基础代谢率与产热；促进脑与骨骼发育（胎儿期缺乏致呆小症）；提高β受体对儿茶酚胺的敏感性，故甲亢见心动过速、脉压增大","t":"生理学 内分泌 A必掌握","c":"第十一章 第三节 甲状腺内分泌"},{"f":"请复述「甲状腺功能的调节」的必掌握判别要点","b":"TRH促TSH、TSH促T3/T4合成释放；T3/T4负反馈抑制TRH与TSH；缺碘时T3/T4减少致TSH升高与甲状腺肿；大剂量碘抑制甲状腺激素释放（Wolff-Chaikoff效应）","t":"生理学 内分泌 A必掌握","c":"第十一章 第三节 甲状腺内分泌"},{"f":"请复述「肾上腺皮质激素」的必掌握判别要点","b":"球状带醛固酮（保钠排钾）、束状带皮质醇（升血糖、抗炎、抗免疫）、网状带性激素；ACTH主要促皮质醇；皮质醇对 CRH 与 ACTH 呈负反馈","t":"生理学 内分泌 A必掌握","c":"第十一章 第四节 肾上腺内分泌"},{"f":"请复述「胰岛素与胰高血糖素」的必掌握判别要点","b":"胰岛素由B细胞分泌，促糖摄取利用与糖原合成、抑糖异生，是唯一降血糖激素；胰高血糖素由A细胞分泌，促糖原分解与糖异生；血糖浓度是最重要的调节因素","t":"生理学 内分泌 A必掌握","c":"第十一章 第五节 胰岛内分泌"},{"f":"请复述「甲状旁腺激素与钙磷代谢」的必掌握判别要点","b":"PTH升血钙降血磷（促骨吸收、促肾小管重吸收钙、促1,25-(OH)2-D3生成）；降钙素降血钙降血磷；维生素D促肠钙吸收与骨钙化","t":"生理学 内分泌 A必掌握","c":"第十一章 第六节 甲状旁腺内分泌"},{"f":"请复述「男性生殖功能」的必掌握判别要点","b":"睾酮由间质细胞分泌，维持生精、促男性化与合成代谢；FSH作用于支持细胞促生精，LH促睾酮分泌；睾酮负反馈抑制GnRH与LH","t":"生理学 生殖 B必掌握","c":"第十二章 第一节 男性生殖"},{"f":"请复述「卵巢周期与激素」的必掌握判别要点","b":"卵泡期雌激素逐渐升高，排卵前达高峰并正反馈触发LH峰；黄体期孕激素与雌激素均升高；雌激素对LH呈低浓度抑制、高浓度正反馈的双相作用","t":"生理学 生殖 A必掌握","c":"第十二章 第二节 女性生殖"},{"f":"请复述「月经周期」的必掌握判别要点","b":"月经期因黄体萎缩、雌孕激素骤降致内膜脱落出血；增生期受雌激素作用内膜增厚；分泌期受孕激素作用腺体分泌、为着床准备；周期约28天","t":"生理学 生殖 A必掌握","c":"第十二章 第二节 女性生殖"},{"f":"请复述「妊娠与分娩的内分泌调节」的必掌握判别要点","b":"受精后滋养层分泌hCG维持黄体、8至10周达峰；hPL促乳腺发育与胎儿生长；分娩启动与子宫肌兴奋性升高、缩宫素与前列腺素、胎膜与宫颈成熟相关；哺乳期吸吮抑制GnRH致闭经","t":"生理学 生殖 A必掌握","c":"第十二章 第二节 女性生殖"}]};
+</script>
+<script>
+/* 生理学每日学习助手 · 学习材料数据（25 篇，与知识点计划日期一一对应） */
+window.__NKMATERIALS__ = [{"id":"P01","date":"2026-10-21","module":"绪论","prio":"B","title":"生理学的研究对象与研究方法","chapter":"第一章 第一节 生理学的研究内容和方法","pos":"这一节不考细节，但决定了你后面所有推导的尺度：同一个现象在整体、器官、细胞三个层面看到的规律并不相同。","body":[{"h":"一、生理学研究什么","t":"生理学研究机体生命活动的现象、规律、机制及其对内外环境变化的反应，最终服务于「功能如何实现」这一问题。它与解剖学（结构）、生物化学（分子过程）互为支撑：解剖给形态，生化给分子，生理给功能整合。判断一道题是否属于生理学，看它问的是「结构长什么样」还是「功能怎么实现、为什么这样实现」。"},{"h":"二、三个研究层次","t":"整体水平：研究完整机体在环境变化下的整合反应，如运动时血压、呼吸、体温的协同调节。器官系统水平：研究某一器官或系统的功能及其影响因素，如心脏泵血、肾脏泌尿。细胞分子水平：研究细胞膜转运、离子通道、信号转导等基本机制。三层不是并列的学科分支，而是同一功能在不同尺度上的解释：细胞机制解释器官表现，器官表现解释整体反应。答题时先判断题目落在哪一层，再选对应语言作答，避免用整体现象去解释细胞机制。"},{"h":"三、研究方法：急性与慢性","t":"急性动物实验又分在体与离体：在体实验保留神经体液联系，可观察完整调节；离体实验排除整体干扰，便于研究单一组织或细胞的直接机制，但失去神经体液调控。慢性动物实验在清醒、接近自然状态下长期观察，最能反映整体功能，但周期长、条件控制难。三者取舍的核心是：你要保留调节回路，还是要排除干扰。"},{"h":"四、学习方法提示","t":"生理学的记忆量集中在「数值区间、离子流向、调节通路」三类信息上，其余多为可推导的因果链。建议读每一节时先立一条主线：刺激 → 感受器 → 传入 → 中枢整合 → 传出 → 效应器 → 反馈，把具体知识点挂到这条链上，遗忘时按链找回。"}],"keys":["生理学研究功能实现机制，与解剖（结构）、生化（分子）互为支撑","三层次：整体水平、器官系统水平、细胞分子水平，是同一功能的不同尺度","急性实验含在体（保留调节）与离体（排除干扰）；慢性实验观察清醒整体状态"],"traps":["把三个研究层次当成互相独立的学科分支，是常见概念题错误","离体实验结论不能直接外推到整体，因为丢失了神经体液调节"],"quiz":[{"q":"离体蛙心灌流实验观察到心率随灌流液钙浓度变化，能否据此推断整体动物血钙升高时心率必然同向变化？","a":"不能。离体实验排除了神经与体液调节，整体动物中血钙变化会同时触发压力感受性反射、交感与迷走张力改变等代偿，最终表现可能被掩盖或反转。答题时应先说明实验层次的局限，再讨论整体推断。"}],"src":["人卫版《生理学》第9版 第一章；Ganong 生理学复习纲要（研究方法部分）"]},{"id":"P02","date":"2026-10-22","module":"绪论","prio":"A","title":"内环境与稳态","chapter":"第一章 第二节 机体的内环境","pos":"稳态不是「不变」，而是「在波动中被拉回」。把这句话真正理解，后面血压、血糖、体温、酸碱的调节就都是它的应用题。","body":[{"h":"一、内环境的概念","t":"内环境指细胞外液，包括血浆、组织液、淋巴液与脑脊液等，是细胞直接生活的液体环境。它与外环境（外界空气、饮食内容）之间隔着皮肤、黏膜、消化道壁等屏障，因此外环境的剧烈变化并不直接传导给细胞。"},{"h":"二、稳态的定义与实质","t":"稳态指内环境的理化性质（温度、pH、渗透压、离子浓度、血糖、血压等）在微小范围内波动的动态平衡状态。关键词有三个：一是「动态」，说明各项指标时刻在小幅变化；二是「平衡」，说明存在把偏离纠回的机制；三是「范围」，说明判定标准是区间而非点值。把稳态理解成数值恒定不变，是最常见的概念性失分。"},{"h":"三、维持机制","t":"稳态靠负反馈调节维持，涉及神经、体液、自身调节三条途径。以血糖为例：进食后血糖升高 → 胰岛B细胞分泌胰岛素增加 → 促进组织摄取利用葡萄糖、肝糖原合成 → 血糖回落；血糖过低时胰高血糖素与肾上腺素升高 → 糖原分解与糖异生增加 → 血糖回升。整条通路就是「偏离—检测—纠正」的闭环。"},{"h":"四、稳态破坏的临床意义","t":"疾病在很大程度上就是稳态维持能力被突破。失血时先靠压力感受性反射与RAAS维持血压，代偿失败才出现休克；糖尿病是血糖调节环路失效；尿毒症是内环境代谢产物清除障碍。理解稳态，等于拿到一条把病理生理串起来的主线。"}],"keys":["内环境＝细胞外液（血浆、组织液、淋巴、脑脊液）","稳态＝理化性质在微小波动中的动态平衡，判定靠区间不靠点值","维持机制以负反馈为核心，涉及神经、体液、自身调节"],"traps":["把稳态等同于恒定不变，忽略「波动」这一必要成分","把细胞内液当作内环境，实际内环境只指细胞外液"],"quiz":[{"q":"剧烈运动时体温升至38.5℃，出汗后回落至37℃，这一过程是否说明稳态被破坏？","a":"不说明。稳态允许指标在有限范围内波动，关键在于是否存在有效的纠偏机制。本例中体温升高触发散热增加并回落，正是稳态调节在工作；若持续升高且散热机制失效（如中暑），才是稳态被突破。"}],"src":["人卫版《生理学》第9版 第一章第二节；《病理生理学》第9版 水电解质与酸碱平衡章节"]},{"id":"P03","date":"2026-10-23","module":"绪论","prio":"A","title":"生理功能的调节方式：神经、体液与自身调节","chapter":"第一章 第三节 机体生理功能的调节","pos":"三条调节途径的价值不在记忆定义，而在「给一个现象，能判断它走的是哪条路」。这也是病例分析与机制题的通用起手式。","body":[{"h":"一、神经调节","t":"通过反射弧完成，路径为感受器 → 传入神经 → 神经中枢 → 传出神经 → 效应器。特点是迅速、准确、短暂、定位清楚，在多数快速反应中占主导地位，如压力感受性反射、腱反射、瞳孔对光反射。判断要点：有没有明确的反射弧、反应是否在毫秒到秒级完成。"},{"h":"二、体液调节","t":"通过血液或组织液中的化学物质（激素、代谢产物、细胞因子）作用于靶细胞。特点是缓慢、广泛、持久，如甲状腺激素对代谢的长期调节、醛固酮对水盐的调节、CO2对呼吸的刺激。注意局部性体液调节（如组织代谢产物扩张局部血管）虽不经血液循环远距离运输，仍归入体液调节范畴。"},{"h":"三、自身调节","t":"不依赖神经与体液，由组织器官自身对刺激的直接反应完成。典型例子：心肌异长自身调节（前负荷增加使初长度增加、收缩力增强）、肾血流自身调节（动脉压在80至180mmHg内波动时肾血流量相对恒定）、脑血管的肌源性调节。判断要点：切断神经、阻断激素后现象依然存在。"},{"h":"四、三者的协同与分层","t":"真实生理过程通常三条途径叠加，且有先后顺序。以血压下降为例：数秒内压力感受性反射启动（神经调节），数分钟至数小时RAAS与ADH介入（体液调节），长期则靠肾脏调节血容量与血管重塑。考试中若问「最主要的调节方式」，要按时间尺度作答，而不是笼统答神经调节。"}],"keys":["神经调节：快、准、短，经反射弧，占主导","体液调节：慢、广、久，经激素与代谢产物","自身调节：不依赖神经体液，如心肌异长自身调节、肾血流自身调节"],"traps":["把局部代谢产物扩张血管排除在体液调节之外，属于分类错误","问「最主要」时忽略时间尺度，一律答神经调节"],"quiz":[{"q":"离体肾灌注实验中，灌注压从100mmHg升至150mmHg，肾血流量几乎不变。这属于哪种调节？","a":"自身调节（肌源性机制为主，兼有管球反馈）。实验已排除神经与全身体液因素，血流量在80至180mmHg区间内保持相对恒定，正是肾血流自身调节的定义性表现。"}],"src":["人卫版《生理学》第9版 第一章第三节"]},{"id":"P04","date":"2026-10-24","module":"绪论","prio":"A","title":"反馈控制与前馈：负反馈、正反馈与前馈","chapter":"第一章 第三节 体内的控制系统","pos":"控制论语言是生理学的通用语法。负反馈维持稳态，正反馈制造「一旦启动就不可逆」的过程，前馈则是「预判式」调节。","body":[{"h":"一、负反馈","t":"输出信息反过来抑制或减弱控制部分的活动，使输出朝相反方向变化，从而把指标稳定在调定点附近。生理意义是维持稳态，是机体最普遍、最重要的调节形式。典型例：压力感受性反射（血压升高 → 抑制心交感、兴奋心迷走 → 血压回落）、体温调节、血糖调节、甲状腺激素对TRH与TSH的负反馈。"},{"h":"二、正反馈","t":"输出信息反过来增强控制部分的活动，使过程不断加速，直至完成。生理意义是使某一过程「一次性走到底」，本身不维持稳态。典型例：分娩时宫缩刺激宫颈 → 缩宫素释放增加 → 宫缩更强；排尿反射中膀胱收缩 → 牵张 → 收缩更强；凝血过程中凝血酶激活更多凝血酶原；动作电位去极相Na+内流。"},{"h":"三、前馈","t":"干扰信号在尚未引起输出偏差之前，就通过预判性通路提前启动调节，使偏差不至于发生。典型例：见到食物、闻到气味时胃液与唾液提前分泌；运动开始前心率与呼吸先升高。前馈比负反馈「更快一步」，但预判错误时会造成调节过量。"},{"h":"四、三类控制方式的判别","t":"看三点：方向（输出是削弱还是增强控制活动）、目的（维持稳定还是推动过程完成）、时序（偏差后纠正还是偏差前预防）。做题时最常见的是把正反馈误判为「不好的调节」——正反馈本身中性，关键在于该过程是否需要迅速终结。"}],"keys":["负反馈：削弱控制活动，维持稳态，最普遍","正反馈：增强控制活动，推动过程完成，如分娩、排尿、凝血、AP去极相","前馈：偏差发生前预判性启动，如进食前胃液分泌"],"traps":["把正反馈等同于病理状态；实际上分娩、凝血、排尿均为正常生理性正反馈","把「见到食物流口水」归为负反馈，实为前馈"],"quiz":[{"q":"大量失血后血压下降，压力感受性反射使心率加快、外周血管收缩。这一调节属于哪类控制，其局限是什么？","a":"属负反馈（血压下降被部分纠回）。局限在于：感受器对持续性低血压会发生适应，且当血压低于感受器阈值（约50至60mmHg）时反射失效，此时需靠RAAS、ADH与肾脏调节血容量，代偿失败即进入失代偿性休克。"}],"src":["人卫版《生理学》第9版 第一章第三节；《病理生理学》第9版 休克章节"]},{"id":"P05","date":"2026-10-25","module":"细胞","prio":"B","title":"细胞膜的结构与跨膜转运总览","chapter":"第二章 第一节 细胞膜的结构和物质转运功能","pos":"所有跨膜转运题的解题第一步都是同一件事：先判断物质性质（脂溶性、分子大小、带电与否），再判断是否需要膜蛋白和能量。","body":[{"h":"一、膜的分子结构","t":"细胞膜以脂质双层为骨架，镶嵌或附着蛋白质，外表面连有糖链形成糖萼。脂质双层疏水核心构成通透屏障：脂溶性小分子可自由穿行，水溶性物质与带电离子则必须借助膜蛋白。膜的流动性受胆固醇与脂肪酸饱和度影响，温度降低时流动性下降（这与冷藏保存红细胞、血小板时膜损伤相关）。"},{"h":"二、跨膜转运的四类","t":"被动转运（不耗能，顺浓度梯度）：单纯扩散与易化扩散（经载体、经通道）。主动转运（耗能，逆浓度梯度）：原发性（直接耗ATP，如钠泵、钙泵、质子泵）与继发性（借其他物质的浓度梯度供能，如Na+-葡萄糖同向转运）。膜泡运输：出胞与入胞，转运大分子与颗粒，需耗能并有囊泡融合。"},{"h":"三、判断流程","t":"第一步看是否为气体或脂溶性小分子（O2、CO2、N2、乙醇、类固醇激素）→ 单纯扩散。第二步看是否为水或离子→ 经通道。第三步看是否为葡萄糖、氨基酸等有机小分子→ 需载体；若为顺梯度则易化扩散，逆梯度则继发性主动转运（肠、肾小管上皮）。第四步看是否为蛋白质、多糖、细菌等大分子→ 出胞或入胞。"},{"h":"四、临床衔接","t":"洋地黄抑制钠泵，使细胞内Na+升高、经Na+-Ca2+交换使细胞内Ca2+升高而增强心肌收缩力；质子泵抑制剂阻断胃壁细胞H+-K+-ATP酶而抑酸；甘露醇经渗透作用脱水。这些药物的机制都直接建立在转运分类之上。"}],"keys":["脂质双层为屏障，疏水核心决定「脂溶性可穿、水溶性需蛋白」","四类：被动（单纯扩散、易化扩散）、主动（原发、继发）、膜泡运输","判断顺序：物质性质 → 是否需蛋白 → 是否耗能"],"traps":["把水的转运一律当作单纯扩散；水主要经水通道（aquaporin）转运","把继发性主动转运误判为不耗能，实际间接消耗钠泵建立的梯度"],"quiz":[{"q":"肠上皮细胞从肠腔吸收葡萄糖属于哪种转运方式，为什么不是易化扩散？","a":"继发性主动转运（Na+-葡萄糖同向转运，SGLT）。虽然葡萄糖本身顺浓度梯度进入细胞，但驱动力来自钠泵维持的Na+跨膜梯度，属于间接耗能，故不是易化扩散；其基侧膜面的GLUT2则为易化扩散。"}],"src":["人卫版《生理学》第9版 第二章第一节；《药理学》第9版 强心苷与质子泵抑制剂章节"]},{"id":"P06","date":"2026-10-27","module":"细胞","prio":"A","title":"单纯扩散与易化扩散","chapter":"第二章 第一节 细胞膜的结构和物质转运功能","pos":"三者最容易混的是「谁饱和、谁有竞争性抑制、谁受膜电位影响」。把这三问背成条件反射，选择题几乎不会再错。","body":[{"h":"一、单纯扩散","t":"物质以分子运动方式直接穿过脂质双层，顺浓度梯度，不耗能、不需膜蛋白。速率取决于膜两侧浓度差与膜对该物质的通透性，无饱和现象。典型物质：O2、CO2、N2、乙醇、尿素、类固醇激素、部分麻醉药。判断要点：无饱和、无竞争、不受膜蛋白阻断剂影响。"},{"h":"二、经载体易化扩散","t":"水溶性小分子在载体蛋白帮助下顺浓度梯度转运，如葡萄糖进入红细胞（GLUT1）、氨基酸进入细胞。三大特征：结构特异性（载体只认特定构型）、饱和现象（载体数量有限，浓度升高到一定程度速率不再增加）、竞争性抑制（结构类似物竞争同一载体）。此外还受温度与膜脂质成分影响。"},{"h":"三、经通道易化扩散","t":"带电离子经离子通道顺电化学梯度跨膜，如Na+、K+、Ca2+通道。特点：转运速率极快（每秒可过10^7至10^8个离子）、有离子选择性、受门控调节（电压门控、配体门控、机械门控）。通道有开放与关闭两种构象，处于开放状态时才导通。与载体相比，通道无饱和现象，但可被特异性阻断剂阻断（如河豚毒素阻断电压门控钠通道、四乙铵阻断钾通道）。"},{"h":"四、三者的对比框架","t":"把五个维度列成一张表：是否需膜蛋白、是否耗能、是否饱和、是否有竞争性抑制、是否受膜电位影响。单纯扩散：不需要、不耗能、不饱和、无竞争、不受膜电位影响；载体介导：需要、不耗能、饱和、有竞争；通道介导：需要、不耗能、不饱和、可有特异性阻断、受膜电位影响。考试中出现「饱和」二字，几乎可以锁定载体。"}],"keys":["单纯扩散：不需蛋白、不耗能、不饱和，O2/CO2/乙醇/类固醇","载体介导：有特异性、饱和、竞争性抑制，如GLUT1转运葡萄糖","通道介导：极快、有选择性、门控，可被特异性阻断剂阻断"],"traps":["把离子通道介导的转运说成「有饱和现象」，属概念混淆","把尿素列为需要载体的物质，实际尿素可经脂质双层单纯扩散"],"quiz":[{"q":"给红细胞悬液加入葡萄糖结构类似物后，葡萄糖摄取速率下降；再加入足量葡萄糖后下降幅度减小。这提示什么机制？","a":"提示经载体易化扩散的竞争性抑制。类似物与葡萄糖竞争同一载体结合位点，故速率下降；提高葡萄糖浓度后竞争力增强，抑制被部分克服，这一表现与单纯扩散、通道介导均不符。"}],"src":["人卫版《生理学》第9版 第二章第一节"]},{"id":"P07","date":"2026-10-28","module":"细胞","prio":"A","title":"原发性主动转运：钠泵及其生理意义","chapter":"第二章 第一节 细胞膜的结构和物质转运功能","pos":"钠泵是整本生理学的「地基」：没有它，静息电位、动作电位、继发性主动转运、细胞体积调节全部塌掉。","body":[{"h":"一、化学本质与转运比例","t":"钠泵即Na+-K+-ATP酶，由α与β两个亚基组成，位于细胞膜上。每分解1分子ATP，将3个Na+移出细胞、2个K+移入细胞，属逆浓度梯度的原发性主动转运。由于每次循环净移出1个正电荷，故称生电性钠泵，对静息电位有少量贡献（约数毫伏）。"},{"h":"二、生理意义","t":"第一，维持细胞内高K+、细胞外高Na+的跨膜浓度梯度，这是静息电位与动作电位产生的物质基础。第二，为继发性主动转运提供动力，如肠与肾小管上皮的Na+-葡萄糖同向转运、Na+-Ca2+交换。第三，调节细胞体积：细胞外液低渗时细胞肿胀，钠泵激活将Na+泵出并伴随水外移，防止细胞破裂。第四，维持细胞内pH，通过Na+-H+交换参与酸碱调节。第五，为营养物质吸收提供驱动力。"},{"h":"三、能量代谢与调节","t":"钠泵耗能占静息代谢率的相当比例（神经组织可达20%至40%），因此缺氧、低温、代谢抑制时钠泵活性下降，细胞内Na+蓄积、细胞肿胀。甲状腺激素、胰岛素、醛固酮可上调钠泵活性；哇巴因（ouabain）与洋地黄类为其特异性抑制剂。"},{"h":"四、临床联系","t":"洋地黄抑制心肌细胞钠泵 → 细胞内Na+升高 → Na+-Ca2+交换增强 → 细胞内Ca2+升高 → 心肌收缩力增强（正性肌力）；同时因Na+蓄积使静息电位绝对值减小、膜电位接近阈电位，易诱发心律失常，这是洋地黄中毒的电生理基础。缺血再灌注时钠泵功能恢复延迟，是细胞水肿与钙超载的重要环节。"}],"keys":["Na+-K+-ATP酶，1个ATP泵出3个Na+、泵入2个K+，净移出1个正电荷","维持离子梯度、供能继发转运、调节细胞体积、参与pH调节","洋地黄与哇巴因抑制钠泵；缺氧低温使钠泵活性下降"],"traps":["记成「泵入3个Na+、泵出2个K+」，方向与比例同时错","认为钠泵对静息电位无贡献，忽略其生电性作用"],"quiz":[{"q":"洋地黄增强心肌收缩力与诱发心律失常，为何是同一机制的两个结果？","a":"均源于抑制钠泵。收缩力增强：细胞内Na+升高→Na+-Ca2+交换增强→细胞内Ca2+升高→收缩力增强。心律失常：Na+蓄积使静息电位绝对值减小、接近阈电位，兴奋性升高、传导减慢，易形成折返与触发活动。因此治疗窗窄，需监测血钾与心电图。"}],"src":["人卫版《生理学》第9版 第二章第一节；《药理学》第9版 强心苷章节"]},{"id":"P08","date":"2026-10-29","module":"细胞","prio":"B","title":"继发性主动转运与膜泡运输","chapter":"第二章 第一节 细胞膜的结构和物质转运功能","pos":"判断继发性主动转运的关键一问：这个物质自己逆梯度，动力是不是来自另一个物质的顺梯度？若答案是「是」，即属此类。","body":[{"h":"一、继发性主动转运","t":"不直接消耗ATP，而是利用钠泵建立的Na+跨膜浓度梯度供能，属间接耗能。分同向转运（symport，如Na+-葡萄糖、Na+-氨基酸在小肠与肾小管上皮刷状缘）与反向转运（antiport，如Na+-H+交换、Na+-Ca2+交换）。判断要点：转运本身不水解ATP，但去除钠泵梯度后转运立即停止。"},{"h":"二、常见实例与抑制剂","t":"肠道与肾小管葡萄糖吸收用SGLT（钠依赖葡萄糖转运体），基侧膜面再以GLUT2易化扩散出细胞；甲状腺滤泡细胞摄碘经钠碘同向转运体（NIS），是甲状腺显像与放射性碘治疗的基础；肾小管Na+-H+交换参与HCO3-重吸收。根皮苷抑制SGLT，可解释肾性糖尿；强心苷间接抑制Na+-Ca2+交换。"},{"h":"三、膜泡运输：出胞与入胞","t":"出胞：胞内囊泡移至膜下、与膜融合、把内容物排出，如神经递质释放、激素分泌、消化酶分泌，需Ca2+内流触发。入胞：膜内陷包裹外物形成囊泡，分吞噬（颗粒，如中性粒细胞吞噬细菌）与吞饮（液体）；受体介导入胞使大分子高效摄取，如LDL经LDL受体入胞，该通路障碍致家族性高胆固醇血症。"},{"h":"四、与其他转运方式的鉴别","t":"原发性主动转运：直接水解ATP，如钠泵、钙泵、质子泵。继发性主动转运：不直接水解ATP，借Na+梯度。易化扩散：顺梯度、不耗能。三者常被放在一道题中比较，判断只看两点：方向上是否逆梯度、能量上是否直接耗ATP。"}],"keys":["继发主动转运借Na+梯度供能，分同向（SGLT）与反向（Na+-H+、Na+-Ca2+）","出胞需Ca2+触发，如递质与激素释放；入胞含吞噬、吞饮、受体介导","LDL受体介导入胞障碍致家族性高胆固醇血症"],"traps":["把Na+-Ca2+交换说成原发性主动转运，其能量来自Na+梯度，属继发性","认为继发性主动转运完全不耗能，忽略其对钠泵的间接依赖"],"quiz":[{"q":"抑制钠泵后，小肠上皮对葡萄糖的吸收为何迅速下降？","a":"因SGLT的驱动力是Na+跨膜梯度，该梯度由钠泵维持。钠泵被抑制后细胞内Na+蓄积、梯度消失，同向转运失去动力，葡萄糖吸收随之下降，这正说明其属继发性主动转运而非易化扩散。"}],"src":["人卫版《生理学》第9版 第二章第一节；《生物化学与分子生物学》第9版 脂蛋白代谢章节"]},{"id":"P09","date":"2026-10-30","module":"细胞的基本功能","prio":"A","title":"静息电位及其产生机制","chapter":"第二章 第二节 细胞的生物电现象","pos":"静息电位（RP）是后面所有电活动讨论的起点：动作电位的幅度、阈电位的关系、兴奋性的高低，全都要减去这个基线。","body":[{"h":"一、定义与数值","t":"静息电位是细胞未受刺激时存在于膜两侧的电位差，规定膜外为 0，膜内为负值。骨骼肌约 -90 mV，神经细胞约 -70 mV，平滑肌约 -55 mV。所有可兴奋细胞的 RP 都是内负外正，这一极性由膜两侧离子分布与膜的选择通透性共同决定。"},{"h":"二、形成机制","t":"细胞内 K+ 浓度约为细胞外的 30 倍，安静时膜对 K+ 通透性最高（钾漏通道），K+ 顺浓度梯度外流并把正电荷带走，使膜内变负；外流的 K+ 在膜外堆积形成电场，排斥后续 K+ 外流。当浓度梯度驱动力与电场阻力相等时达到 K+ 电-化学平衡，膜电位趋近 K+ 平衡电位（EK）。可用 Nernst 公式计算 EK≈59.5·lg([K+]o/[K+]i) mV（37℃）。实际 RP 绝对值略小于 EK，因为膜对 Na+ 有少量通透（Na+ 内流使膜去极化），并且生电性钠泵每次泵出 3 个 Na+、泵入 2 个 K+，净移出正电荷，使膜内更负。"},{"h":"三、影响因素","t":"细胞外 K+ 浓度升高 → 浓度梯度减小 → EK 绝对值减小 → RP 绝对值减小（去极化），这是高钾血症心肌兴奋性异常的离子基础。细胞外 K+ 降低时 RP 绝对值理论上增大，但实际因低钾抑制钠泵而可能出现反常去极化。钠泵被哇巴因抑制或代谢障碍（缺氧）时，生电性作用消失、离子梯度耗散，RP 绝对值减小。细胞外 Na+ 浓度对 RP 影响很小，因安静时钠通透性低。"},{"h":"四、与临床的连接","t":"高钾血症时 RP 绝对值减小，膜部分去极化使快钠通道处于失活状态，兴奋性反而下降，严重时心脏停搏；这一「先兴奋后抑制」的规律是判断高钾心电图改变（T 波高尖→P 波消失→QRS 增宽）的关键。"}],"keys":["RP 是 K+ 外流达电-化学平衡形成，数值接近 EK","RP 绝对值略小于 EK：少量 Na+ 内流 + 生电性钠泵","细胞外 K+ 升高 → RP 绝对值减小（去极化）"],"traps":["把 RP 说成「K+ 完全静止的平衡」，忽略其动态性与 Na+ 漏流","认为 RP 等于 EK 的精确值，答题时未提及 Na+ 内流与钠泵贡献"],"quiz":[{"q":"给离体神经纤维灌流液换成高钾溶液，静息电位与兴奋性如何变化？","a":"RP 绝对值减小（去极化）。轻度升高时距阈电位更近、兴奋性升高；继续升高则快钠通道大量失活，兴奋性下降甚至消失。答题要写「先升后降」并说明通道失活机制。"}],"src":["人卫版《生理学》第9版 第二章第二节；Ganong 生理学（膜电位章节）"]},{"id":"P10","date":"2026-10-31","module":"细胞的基本功能","prio":"A","title":"动作电位的波形与离子机制","chapter":"第二章 第二节 细胞的生物电现象","pos":"动作电位（AP）是「全或无」的，幅度由离子平衡电位与通道状态锁定，不随刺激强度改变——这是理解兴奋、传导、不应期的总钥匙。","body":[{"h":"一、波形分期","t":"典型 AP 分：①锋电位——去极相（膜内由 -70 mV 迅速上升到 +30 mV 左右）与复极相（迅速回落）；②超射——去极相中膜内电位由零变为正值的部分，幅度接近 Na+ 平衡电位；③后电位——负后电位（复极末端缓慢去极化小波）与正后电位（超极化）。整个锋电位约 1-2 ms，是「全或无」的主体。"},{"h":"二、离子机制","t":"去极相：达到阈电位后电压门控 Na+ 通道大量开放，Na+ 内流形成正反馈（再生性去极化），膜电位趋向 ENa（约 +60 mV）。复极相：Na+ 通道迅速失活关闭，电压门控 K+ 通道延迟开放，K+ 外流使膜复极。后电位：K+ 外流过多形成短暂超极化（正后电位），钠泵加速转运逐步恢复离子梯度（负后电位期）。AP 结束后钠泵活动增强，把内流的 Na+ 泵出、外流的 K+ 泵回。"},{"h":"三、三个基本特性","t":"①全或无：刺激达到阈值即产生固定幅度的 AP，不随刺激强度增加而增大；②不衰减传导：AP 在传导过程中幅度不减小；③脉冲式：不能融合，因存在不应期。这三点与局部电位形成对照，是选择题高频对照点。"},{"h":"四、影响因素","t":"细胞外 Na+ 浓度降低 → ENa 减小 → 超射幅度减小、AP 幅度降低；细胞外 K+ 升高 → RP 绝对值减小 → 与阈电位距离改变，同时 K+ 通道驱动力下降使复极延缓；局麻药（普鲁卡因、利多卡因）阻断 Na+ 通道，使 AP 幅度降低直至消失。"}],"keys":["去极相由 Na+ 内流正反馈形成，超射幅度接近 ENa","复极相由 Na+ 通道失活 + K+ 外流完成，钠泵恢复离子梯度","AP 三大特性：全或无、不衰减传导、脉冲式（有不应期）"],"traps":["把超射幅度直接等同于 ENa 的精确值，忽略通道失活与膜电容","认为复极相是钠泵主动泵出 Na+ 造成的，实际主要是 K+ 外流"],"quiz":[{"q":"为什么动作电位幅度不随刺激强度增大而增大？","a":"因为达到阈电位后 Na+ 通道全开放，膜电位趋向 ENa，幅度由离子浓度梯度与通道状态决定，与刺激强度无关；更强刺激只能增加刺激频率（多由不应期决定），不改变单次 AP 幅度。"}],"src":["人卫版《生理学》第9版 第二章第二节；Ganong 生理学（动作电位章节）"]},{"id":"P11","date":"2026-11-02","module":"细胞的基本功能","prio":"A","title":"动作电位的传导与局部电位","chapter":"第二章 第二节 细胞的生物电现象","pos":"同一根神经纤维上，AP 靠局部电流不断「重新点火」向前走；而局部电位只能原地衰减扩散——两者不可混用。","body":[{"h":"一、传导机制","t":"已兴奋区膜内为正、未兴奋区膜内为负，两者之间形成局部电流，使邻近未兴奋段去极化到阈电位，从而触发新的 AP。所以传导的本质是「局部电流引起邻近膜再生性去极化」，AP 在每个位点都是新产生的，故幅度不衰减。"},{"h":"二、两种传导方式","t":"无髓纤维为连续传导，逐点产生 AP，速度慢；有髓纤维髓鞘绝缘，只在郎飞结处有可兴奋膜，局部电流在结间跳跃，称跳跃式传导，速度快且节能。传导速度与纤维直径正相关、与髓鞘完整性正相关、与温度正相关（温度过低显著减慢）。B 类纤维轻度髓鞘化，C 类无髓鞘，速度最慢。"},{"h":"三、局部电位的特点","t":"局部电位（如终板电位、感受器电位、突触后电位）由局部离子通道开放引起，特点：①等级性——幅度随刺激强度增减；②衰减性——随距离指数衰减；③可总和——时间总和与空间总和；④无不应期，可叠加。局部电位是「电信号的前体」，达到阈电位才转化为 AP。"},{"h":"四、对照记忆","t":"AP：全或无、不衰减、有不应期、可沿膜传导远距离；局部电位：等级性、衰减、可总和、无不应期、只在局部。临床联系：局麻药阻断 Na+ 通道，使局部电流无法引起再生性去极化，传导被阻断而意识清醒。"}],"keys":["传导本质：局部电流使邻近膜达阈电位，逐点再生新 AP","有髓纤维跳跃式传导（郎飞结），速度快、耗能少","局部电位等级性、衰减、可总和、无不应期"],"traps":["把局部电位的总和特征误加到 AP 上，说 AP 可以叠加","认为有髓纤维传导快是因为髓鞘导电性好，实际是结间跳跃与电容减小"],"quiz":[{"q":"为什么有髓纤维的 AP 传导速度远快于同等直径的无髓纤维？","a":"髓鞘绝缘使局部电流在结间几乎无漏失，且只在郎飞结处产生 AP（跳跃式传导）；同时髓鞘降低膜电容、增加结间电阻，使更长的膜段在更短时间内达到阈电位。"}],"src":["人卫版《生理学》第9版 第二章第二节；Ganong 生理学（神经传导章节）"]},{"id":"P12","date":"2026-11-03","module":"细胞的基本功能","prio":"A","title":"阈电位、阈刺激与兴奋性","chapter":"第二章 第二节 细胞的生物电现象","pos":"兴奋性的高低，本质上是「RP 与阈电位之间的距离」；而兴奋之后，这段距离会被不应期暂时拉长。","body":[{"h":"一、阈电位","t":"阈电位是能引起 Na+ 通道大量开放、触发再生性去极化的临界膜电位（神经细胞约 -55 mV）。它比 RP 高（更接近零），两者差值越小，越容易兴奋。阈电位水平上移（绝对值增大）→ 差距变大 → 兴奋性降低；阈电位下移（绝对值减小）→ 兴奋性升高。"},{"h":"二、阈刺激与强度-时间曲线","t":"能使组织兴奋的最小刺激强度称阈强度（阈值），它是衡量兴奋性的指标，与兴奋性呈反变关系。刺激强度与作用时间存在依赖：强度-时间曲线呈双曲线，曲线上的点均可致兴奋；基强度是刺激时间足够长时的最小强度，时值是 2 倍基强度所需的最短时间，用于比较不同组织的兴奋性。"},{"h":"三、兴奋后兴奋性的变化","t":"AP 期间及之后依次为：①绝对不应期——Na+ 通道处于失活状态，任何强度刺激都不能兴奋，对应锋电位；②相对不应期——部分通道恢复，需阈上刺激；③超常期——膜轻度超极化，距阈电位更近，阈下刺激即可兴奋；④低常期——膜轻度去极化后通道部分失活，兴奋性低于正常。绝对不应期决定了 AP 不能融合、最高放电频率有限。"},{"h":"四、临床应用","t":"高钾血症初期因 RP 绝对值减小、距阈电位更近而兴奋性升高；重度高钾时 Na+ 通道大量失活，进入「抑制」阶段。局部麻醉药通过降低 Na+ 通道可用性，等效于提高阈值，使阈刺激不再引起 AP。"}],"keys":["阈电位与 RP 的差值决定兴奋性，差值小则兴奋性高","阈强度与兴奋性呈反变关系；时值用于比较不同组织兴奋性","兴奋后依次：绝对不应期→相对不应期→超常期→低常期"],"traps":["把「阈电位升高」理解成兴奋性升高（阈电位数值越正，越难兴奋）","认为绝对不应期内强刺激也能引起 AP"],"quiz":[{"q":"绝对不应期为什么任何强度的刺激都不能引起动作电位？","a":"此时电压门控 Na+ 通道处于失活状态，无论刺激多强都无法使其重新开放，再生性去极化无法启动；直到膜复极到一定水平、通道从失活态恢复，才可能再次兴奋。"}],"src":["人卫版《生理学》第9版 第二章第二节；Ganong 生理学（兴奋性章节）"]},{"id":"P13","date":"2026-11-04","module":"细胞的基本功能","prio":"A","title":"神经-骨骼肌接头兴奋传递","chapter":"第二章 第三节 肌细胞的收缩功能","pos":"这是「电-化学-电」转换的样板过程，毒物、药物、疾病几乎都在这一段的某一步上做文章。","body":[{"h":"一、结构基础","t":"接头由接头前膜（轴突末梢膨大，内含 ACh 囊泡、电压门控 Ca2+ 通道）、接头间隙（约 50 nm）与接头后膜（终板膜，有 N2 型 ACh 受体与乙酰胆碱酯酶）组成。终板膜有皱褶以扩大面积，其 ACh 受体是阳离子通道，开放后主要允许 Na+ 内流。"},{"h":"二、传递三步","t":"①电→化学：神经末梢 AP 使电压门控 Ca2+ 通道开放，Ca2+ 内流触发囊泡与前膜融合，以量子方式释放 ACh；②化学→电：ACh 扩散过间隙与终板膜 N2 受体结合，通道开放，Na+ 内流（少量 K+ 外流）产生终板电位（EPP）；③EPP 是局部电位，等级性、可总和、无不应期，当邻近肌膜去极化达阈电位时触发肌细胞 AP。ACh 迅速被乙酰胆碱酯酶水解为胆碱与乙酸，保证一次神经冲动只引起一次肌肉收缩。"},{"h":"三、影响传递的因素","t":"①Ca2+ 内流是触发环节：细胞外 Ca2+ 降低或 Mg2+ 升高（竞争性）使 ACh 释放减少，出现传递阻滞（高镁血症肌无力）；②筒箭毒碱、α-银环蛇毒阻断 N2 受体，产生松弛性肌麻痹；③琥珀胆碱使终板膜持续去极化，先兴奋后麻痹；④新斯的明、有机磷抑制胆碱酯酶，ACh 蓄积，引起肌束颤动甚至呼吸肌麻痹（有机磷中毒）；⑤肉毒杆菌毒素抑制 ACh 释放，导致弛缓性麻痹。"},{"h":"四、与临床的联系","t":"重症肌无力是 N2 受体抗体介导的受体减少，表现为重复活动后加重的肌无力，新斯的明可暂时改善；肌松药分为去极化型（琥珀胆碱）与非去极化型（筒箭毒碱），前者不能用新斯的明拮抗，后者可以——这是麻醉科常考点。"}],"keys":["传递三步：Ca2+ 内流触发 ACh 量子释放 → 终板电位 → 肌膜 AP","EPP 是局部电位：等级性、可总和、无不应期","N2 受体阻断（箭毒）→ 弛缓性麻痹；胆碱酯酶抑制（有机磷）→ ACh 蓄积"],"traps":["把终板电位当成「全或无」的动作电位","认为新斯的明可拮抗琥珀胆碱，实际只拮抗非去极化型肌松药"],"quiz":[{"q":"高镁血症为什么会导致肌无力？","a":"Mg2+ 与 Ca2+ 竞争神经末梢的钙通道，Ca2+ 内流减少，ACh 释放量下降，终板电位幅度不足以达到阈电位，肌细胞不能产生 AP，表现为弛缓性肌无力。"}],"src":["人卫版《生理学》第9版 第二章第三节；人卫版《药理学》第9版（骨骼肌松弛药章节）"]},{"id":"P14","date":"2026-11-05","module":"细胞的基本功能","prio":"A","title":"骨骼肌收缩的滑行学说与兴奋-收缩耦联","chapter":"第二章 第三节 肌细胞的收缩功能","pos":"收缩时肌丝本身并不缩短，只是相互滑行；把电信号翻译成滑行的，是 Ca2+ 这一个信号分子。","body":[{"h":"一、肌丝的分子组成","t":"粗肌丝由肌球蛋白组成，头部为横桥，具有 ATP 酶活性，可与细肌丝的肌动蛋白结合。细肌丝由肌动蛋白、原肌球蛋白与肌钙蛋白（TnC、TnI、TnT）构成。安静时原肌球蛋白遮盖肌动蛋白上的结合位点，横桥不能结合。"},{"h":"二、滑行学说","t":"收缩时细肌丝向 M 线方向滑入，肌节缩短。关键证据：收缩时 I 带与 H 带缩短，而 A 带（粗肌丝长度）不变，粗、细肌丝自身长度也不变。横桥循环：Ca2+ 与 TnC 结合 → 原肌球蛋白移位暴露位点 → 横桥与肌动蛋白结合 → 横桥摆动（需 ADP+Pi 释放）→ ATP 结合使横桥解离 → ATP 水解使横桥复位，循环往复。"},{"h":"三、兴奋-收缩耦联三环节","t":"①肌膜 AP 沿 T 管传入肌细胞深部；②在三联管处将电信号传给肌浆网，使肌浆网终池 Ca2+ 通道开放，Ca2+ 释放入肌浆（此环节依赖 T 管膜上 DHPR 与肌浆网 RyR 的机械耦联）；③Ca2+ 与肌钙蛋白结合触发横桥循环，引起收缩。舒张则依赖肌浆网钙泵（SERCA）把 Ca2+ 回收入肌浆网，肌浆 Ca2+ 浓度下降。"},{"h":"四、影响因素","t":"细胞外 Ca2+ 降低时，虽骨骼肌收缩依赖肌浆网内钙，但 T 管膜外 Ca2+ 参与耦联，故仍可致收缩减弱；咖啡因促进肌浆网释放 Ca2+，增强收缩；低氧、酸中毒抑制钙泵与横桥循环，使收缩力下降。心肌的耦联还依赖细胞外 Ca2+ 内流触发钙释放（钙触发钙释放），与骨骼肌不同。"}],"keys":["收缩时 A 带长度不变，I 带与 H 带缩短（滑行的判别标志）","耦联三环节：T 管传导 AP → 肌浆网释放 Ca2+ → Ca2+ 结合肌钙蛋白","舒张靠肌浆网钙泵回收 Ca2+，属于主动耗能过程"],"traps":["认为收缩时粗肌丝或细肌丝本身缩短","把心肌的钙触发钙释放机制套用到骨骼肌上"],"quiz":[{"q":"观察到某肌纤维收缩时 A 带长度不变而 I 带缩短，能否据此支持滑行学说？","a":"能。A 带代表粗肌丝全长，其长度不变说明粗肌丝未缩短；I 带只含细肌丝，缩短说明细肌丝向肌节中央滑入。两者结合是滑行学说最直接的形态学证据。"}],"src":["人卫版《生理学》第9版 第二章第三节；Ganong 生理学（肌肉收缩章节）"]},{"id":"P15","date":"2026-11-06","module":"细胞的基本功能","prio":"B","title":"肌肉收缩的力学表现","chapter":"第二章 第三节 肌细胞的收缩功能","pos":"同一块肌肉，前负荷决定「能出多大力」，后负荷决定「能缩多快」，二者共同决定做功。","body":[{"h":"一、等长收缩与等张收缩","t":"等长收缩：肌肉张力增加而长度不变，如站立时维持姿势、推一堵推不动的墙。等张收缩：张力不变而长度缩短，如举起可移动的重物。人体运动多为混合型，通常先等长收缩产生张力，再等张收缩缩短。"},{"h":"二、前负荷与初长度","t":"前负荷是收缩前已承受的负荷，决定肌肉的初长度。在一定范围内，初长度增加 → 粗细肌丝重叠更充分、有效横桥数目增多 → 收缩力增大；达到最适初长度时收缩力最大；超过最适初长度后重叠减少、甚至细肌丝相互干扰，收缩力下降。这一长度-张力关系是 Starling 机制的骨骼肌版本。"},{"h":"三、后负荷","t":"后负荷是收缩开始后遇到的阻力。后负荷增大 → 收缩张力增大、缩短速度减慢、缩短程度减小；当后负荷等于或超过肌肉最大张力时，肌肉不能缩短，只能做等长收缩，做功为零。故中等后负荷时做功最大（功率=力×速度的乘积关系）。"},{"h":"四、单收缩与强直收缩","t":"单收缩分潜伏期、收缩期、舒张期。连续刺激时：若刺激间隔大于单收缩时程，出现一系列单收缩；间隔小于单收缩时程但大于不应期，出现不完全强直收缩（锯齿状）；间隔进一步缩短，出现完全强直收缩（融合、幅度最大）。人体绝大多数随意运动属完全强直收缩，因其产生的张力远大于单收缩。"}],"keys":["前负荷→初长度→有效横桥数→收缩力；最适初长度时力最大","后负荷增大：张力增大、缩短速度减慢，过大则不能缩短","刺激频率增高依次出现单收缩、不完全强直、完全强直收缩"],"traps":["把等长收缩理解为「长度不变所以不做功也无张力」","认为后负荷越大做功越多，忽略缩短速度下降"],"quiz":[{"q":"为什么中等后负荷时肌肉做功最大？","a":"后负荷过小则张力小，做功少；后负荷过大则缩短速度与程度显著下降，甚至不能缩短而做功为零。做功等于张力与缩短长度之积，中等负荷使两者乘积最大。"}],"src":["人卫版《生理学》第9版 第二章第三节；Ganong 生理学（肌肉力学章节）"]}];
+</script>
+<script>
+/* 生理学每日学习助手 · 移动版（单文件离线应用）
+ * 无外部依赖，所有学习状态保存在浏览器 localStorage，可与电脑端导出的 JSON 互通。
+ */
+(function () {
+  'use strict';
+
+  var DATA = window.__NKDATA__ || { plan: [], cards: [] };
+  var PLAN = DATA.plan || [];
+  var BASE_CARDS = DATA.cards || [];
+  var MATERIALS = (window.__NKMATERIALS__ || []);
+  if (!Array.isArray(MATERIALS)) MATERIALS = [];
+  var MATERIAL_BY_ID = {}, MATERIAL_BY_DATE = {};
+  MATERIALS.forEach(function (m) {
+    if (!m || !m.id) return;
+    MATERIAL_BY_ID[m.id] = m;
+    if (m.date) MATERIAL_BY_DATE[m.date] = m;
+  });
+  var MATERIAL_ORDER = MATERIALS.slice().sort(function (a, b) {
+    return String(a.date).localeCompare(String(b.date));
+  });
+  var INTERVALS = DATA.intervals || [3, 7, 14, 30, 60, 120];
+  var MARKS = ['D1', 'D3', 'D7', 'D14', 'D30'];
+  var MARKIDX = { D1: 11, D3: 12, D7: 13, D14: 14, D30: 15 };
+  var COL = {
+    date: 0, week: 1, n: 2, type: 3, module: 4, kn: 5, chap: 6,
+    goal: 7, key: 8, task: 9, marks: 10, prio: 16
+  };
+  var EVAL_REMEMBER = '记住', EVAL_VAGUE = '模糊', EVAL_FORGET = '忘记';
+  var APP_ID = 'slyx-mobile';
+  var APP_VER = '1.1.0';
+  var QUIZ_SIZE = 20;
+
+  /* ------------------------------------------------------------------ */
+  /* 基础工具                                                           */
+  /* ------------------------------------------------------------------ */
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  function iso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function parseISO(s) {
+    var p = String(s || '').split('-');
+    if (p.length !== 3) return null;
+    var y = +p[0], m = +p[1], d = +p[2];
+    if (!y || !m || !d) return null;
+    return new Date(y, m - 1, d);
+  }
+  function addDays(s, n) {
+    var d = parseISO(s);
+    if (!d) return s;
+    d.setDate(d.getDate() + n);
+    return iso(d);
+  }
+  function diffDays(a, b) { return Math.round((parseISO(a) - parseISO(b)) / 86400000); }
+  function todayISO() { return iso(new Date()); }
+  function nowStamp() {
+    var d = new Date();
+    return iso(d) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+  }
+  function weekdayCN(s) {
+    var d = parseISO(s);
+    return d ? '周' + '日一二三四五六'[d.getDay()] : '';
+  }
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  function num(v) { var n = parseInt(v, 10); return isNaN(n) ? 0 : n; }
+
+  /* md5：用于生成与电脑端完全一致的卡片键 card_key(front) */
+  function md5(str) {
+    function safeAdd(x, y) { var l = (x & 0xFFFF) + (y & 0xFFFF); return (x >> 16) + (y >> 16) + (l >> 16) << 16 | l & 0xFFFF; }
+    function bitRol(n, c) { return n << c | n >>> 32 - c; }
+    function md5cmn(q, a, b, x, s, t) { return safeAdd(bitRol(safeAdd(safeAdd(a, q), safeAdd(x, t)), s), b); }
+    function md5ff(a, b, c, d, x, s, t) { return md5cmn(b & c | ~b & d, a, b, x, s, t); }
+    function md5gg(a, b, c, d, x, s, t) { return md5cmn(b & d | c & ~d, a, b, x, s, t); }
+    function md5hh(a, b, c, d, x, s, t) { return md5cmn(b ^ c ^ d, a, b, x, s, t); }
+    function md5ii(a, b, c, d, x, s, t) { return md5cmn(c ^ (b | ~d), a, b, x, s, t); }
+    function utf8(s) {
+      var out = [], i, c;
+      for (i = 0; i < s.length; i++) {
+        c = s.charCodeAt(i);
+        if (c < 128) out.push(c);
+        else if (c < 2048) out.push(192 | c >> 6, 128 | c & 63);
+        else if (c < 55296 || c >= 57344) out.push(224 | c >> 12, 128 | c >> 6 & 63, 128 | c & 63);
+        else { i++; c = 65536 + ((c & 1023) << 10 | s.charCodeAt(i) & 1023); out.push(240 | c >> 18, 128 | c >> 12 & 63, 128 | c >> 6 & 63, 128 | c & 63); }
+      }
+      return out;
+    }
+    var bytes = utf8(String(str));
+    var len = bytes.length, words = [], i;
+    for (i = 0; i < len * 8; i += 8) words[i >> 5] = (words[i >> 5] || 0) | bytes[i / 8] << i % 32;
+    words[len * 8 >> 5] = (words[len * 8 >> 5] || 0) | 0x80 << len * 8 % 32;
+    var l = len * 8;
+    words[(l + 64 >>> 9 << 4) + 14] = l;
+    var a = 1732584193, b = -271733879, c = -1732584194, d = 271733878;
+    for (i = 0; i < words.length; i += 16) {
+      var oa = a, ob = b, oc = c, od = d;
+      a = md5ff(a, b, c, d, words[i] | 0, 7, -680876936); d = md5ff(d, a, b, c, words[i + 1] | 0, 12, -389564586);
+      c = md5ff(c, d, a, b, words[i + 2] | 0, 17, 606105819); b = md5ff(b, c, d, a, words[i + 3] | 0, 22, -1044525330);
+      a = md5ff(a, b, c, d, words[i + 4] | 0, 7, -176418897); d = md5ff(d, a, b, c, words[i + 5] | 0, 12, 1200080426);
+      c = md5ff(c, d, a, b, words[i + 6] | 0, 17, -1473231341); b = md5ff(b, c, d, a, words[i + 7] | 0, 22, -45705983);
+      a = md5ff(a, b, c, d, words[i + 8] | 0, 7, 1770035416); d = md5ff(d, a, b, c, words[i + 9] | 0, 12, -1958414417);
+      c = md5ff(c, d, a, b, words[i + 10] | 0, 17, -42063); b = md5ff(b, c, d, a, words[i + 11] | 0, 22, -1990404162);
+      a = md5ff(a, b, c, d, words[i + 12] | 0, 7, 1804603682); d = md5ff(d, a, b, c, words[i + 13] | 0, 12, -40341101);
+      c = md5ff(c, d, a, b, words[i + 14] | 0, 17, -1502002290); b = md5ff(b, c, d, a, words[i + 15] | 0, 22, 1236535329);
+      a = md5gg(a, b, c, d, words[i + 1] | 0, 5, -165796510); d = md5gg(d, a, b, c, words[i + 6] | 0, 9, -1069501632);
+      c = md5gg(c, d, a, b, words[i + 11] | 0, 14, 643717713); b = md5gg(b, c, d, a, words[i] | 0, 20, -373897302);
+      a = md5gg(a, b, c, d, words[i + 5] | 0, 5, -701558691); d = md5gg(d, a, b, c, words[i + 10] | 0, 9, 38016083);
+      c = md5gg(c, d, a, b, words[i + 15] | 0, 14, -660478335); b = md5gg(b, c, d, a, words[i + 4] | 0, 20, -405537848);
+      a = md5gg(a, b, c, d, words[i + 9] | 0, 5, 568446438); d = md5gg(d, a, b, c, words[i + 14] | 0, 9, -1019803690);
+      c = md5gg(c, d, a, b, words[i + 3] | 0, 14, -187363961); b = md5gg(b, c, d, a, words[i + 8] | 0, 20, 1163531501);
+      a = md5gg(a, b, c, d, words[i + 13] | 0, 5, -1444681467); d = md5gg(d, a, b, c, words[i + 2] | 0, 9, -51403784);
+      c = md5gg(c, d, a, b, words[i + 7] | 0, 14, 1735328473); b = md5gg(b, c, d, a, words[i + 12] | 0, 20, -1926607734);
+      a = md5hh(a, b, c, d, words[i + 5] | 0, 4, -378558); d = md5hh(d, a, b, c, words[i + 8] | 0, 11, -2022574463);
+      c = md5hh(c, d, a, b, words[i + 11] | 0, 16, 1839030562); b = md5hh(b, c, d, a, words[i + 14] | 0, 23, -35309556);
+      a = md5hh(a, b, c, d, words[i + 1] | 0, 4, -1530992060); d = md5hh(d, a, b, c, words[i + 4] | 0, 11, 1272893353);
+      c = md5hh(c, d, a, b, words[i + 7] | 0, 16, -155497632); b = md5hh(b, c, d, a, words[i + 10] | 0, 23, -1094730640);
+      a = md5hh(a, b, c, d, words[i + 13] | 0, 4, 681279174); d = md5hh(d, a, b, c, words[i] | 0, 11, -358537222);
+      c = md5hh(c, d, a, b, words[i + 3] | 0, 16, -722521979); b = md5hh(b, c, d, a, words[i + 6] | 0, 23, 76029189);
+      a = md5hh(a, b, c, d, words[i + 9] | 0, 4, -640364487); d = md5hh(d, a, b, c, words[i + 12] | 0, 11, -421815835);
+      c = md5hh(c, d, a, b, words[i + 15] | 0, 16, 530742520); b = md5hh(b, c, d, a, words[i + 2] | 0, 23, -995338651);
+      a = md5ii(a, b, c, d, words[i] | 0, 6, -198630844); d = md5ii(d, a, b, c, words[i + 7] | 0, 10, 1126891415);
+      c = md5ii(c, d, a, b, words[i + 14] | 0, 15, -1416354905); b = md5ii(b, c, d, a, words[i + 5] | 0, 21, -57434055);
+      a = md5ii(a, b, c, d, words[i + 12] | 0, 6, 1700485571); d = md5ii(d, a, b, c, words[i + 3] | 0, 10, -1894986606);
+      c = md5ii(c, d, a, b, words[i + 10] | 0, 15, -1051523); b = md5ii(b, c, d, a, words[i + 1] | 0, 21, -2054922799);
+      a = md5ii(a, b, c, d, words[i + 8] | 0, 6, 1873313359); d = md5ii(d, a, b, c, words[i + 15] | 0, 10, -30611744);
+      c = md5ii(c, d, a, b, words[i + 6] | 0, 15, -1560198380); b = md5ii(b, c, d, a, words[i + 13] | 0, 21, 1309151649);
+      a = md5ii(a, b, c, d, words[i + 4] | 0, 6, -145523070); d = md5ii(d, a, b, c, words[i + 11] | 0, 10, -1120210379);
+      c = md5ii(c, d, a, b, words[i + 2] | 0, 15, 718787259); b = md5ii(b, c, d, a, words[i + 9] | 0, 21, -343485551);
+      a = safeAdd(a, oa); b = safeAdd(b, ob); c = safeAdd(c, oc); d = safeAdd(d, od);
+    }
+    var hex = '';
+    [a, b, c, d].forEach(function (n) {
+      for (var j = 0; j < 4; j++) hex += ('0' + (n >> j * 8 & 255).toString(16)).slice(-2);
+    });
+    return hex;
+  }
+  function normText(s) { return String(s == null ? '' : s).replace(/\s+/g, '').toLowerCase(); }
+  function cardKey(front) { return md5(normText(front)).slice(0, 12); }
+
+  /* ------------------------------------------------------------------ */
+  /* 存储层（localStorage，失败时降级到内存并提示）                      */
+  /* ------------------------------------------------------------------ */
+  var K = {
+    pg: 'slyx.progress.v1',
+    st: 'slyx.cardstate.v1',
+    ss: 'slyx.stats.v1',
+    ex: 'slyx.extracards.v1',
+    qs: 'slyx.session.v1',
+    mr: 'slyx.materialread.v1',
+    mark: 'slyx.selftest.v1'
+  };
+  var MEM = {};
+  var storageOK = true;
+  var store = {
+    get: function (k) {
+      try {
+        var raw = window.localStorage.getItem(k);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        storageOK = false;
+        return MEM[k] || null;
+      }
+    },
+    set: function (k, v) {
+      MEM[k] = v;
+      try { window.localStorage.setItem(k, JSON.stringify(v)); }
+      catch (e) { storageOK = false; }
+    },
+    raw: function (k) {
+      try { return window.localStorage.getItem(k); } catch (e) { return null; }
+    },
+    del: function (k) {
+      delete MEM[k];
+      try { window.localStorage.removeItem(k); } catch (e) {}
+    }
+  };
+
+  var PG, ST, SS, EXTRA, SESS;
+  var MREAD = { ids: {} };
+  var MQ = { q: '', filter: 'all' };
+  var READER = { list: [], id: null, from: 'list' };
+
+  function blankProgress() {
+    return {
+      version: 1, created: nowStamp(), checkin_dates: [],
+      completed_reviews: [], daily: {}, updated: nowStamp()
+    };
+  }
+  function blankState() {
+    return { version: 1, updated: nowStamp(), cards: {} };
+  }
+  function blankStats() {
+    var ev = {}; ev[EVAL_REMEMBER] = 0; ev[EVAL_VAGUE] = 0; ev[EVAL_FORGET] = 0;
+    return {
+      version: 1, created: nowStamp(), total_answers: 0, correct: 0, wrong: 0,
+      by_eval: ev, forget_counter: {}, vague_counter: {}, daily: {}, history: [],
+      updated: nowStamp()
+    };
+  }
+  function normProgress(o) {
+    var p = (o && typeof o === 'object') ? o : {};
+    var d = blankProgress();
+    if (!Array.isArray(p.checkin_dates)) p.checkin_dates = d.checkin_dates;
+    if (!Array.isArray(p.completed_reviews)) p.completed_reviews = d.completed_reviews;
+    if (!p.daily || typeof p.daily !== 'object') p.daily = {};
+    if (!p.created) p.created = d.created;
+    if (!p.version) p.version = 1;
+    if (!p.updated) p.updated = d.updated;
+    return p;
+  }
+  function normState(o) {
+    var s = (o && typeof o === 'object') ? o : {};
+    if (!s.cards || typeof s.cards !== 'object') s.cards = {};
+    if (!s.version) s.version = 1;
+    if (!s.updated) s.updated = nowStamp();
+    Object.keys(s.cards).forEach(function (k) {
+      var v = s.cards[k];
+      if (!v || typeof v !== 'object') { delete s.cards[k]; return; }
+      v.interval_index = num(v.interval_index);
+      v.reps = num(v.reps);
+      v.lapses = num(v.lapses);
+      if (!v.due) v.due = todayISO();
+      if (!Array.isArray(v.history)) v.history = [];
+    });
+    return s;
+  }
+  function normStats(o) {
+    var s = (o && typeof o === 'object') ? o : {};
+    var d = blankStats();
+    ['total_answers', 'correct', 'wrong'].forEach(function (k) { s[k] = num(s[k]); });
+    if (!s.by_eval || typeof s.by_eval !== 'object') s.by_eval = d.by_eval;
+    [EVAL_REMEMBER, EVAL_VAGUE, EVAL_FORGET].forEach(function (e) { s.by_eval[e] = num(s.by_eval[e]); });
+    if (!s.forget_counter || typeof s.forget_counter !== 'object') s.forget_counter = {};
+    if (!s.vague_counter || typeof s.vague_counter !== 'object') s.vague_counter = {};
+    if (!s.daily || typeof s.daily !== 'object') s.daily = {};
+    if (!Array.isArray(s.history)) s.history = [];
+    if (!s.created) s.created = d.created;
+    if (!s.version) s.version = 1;
+    return s;
+  }
+
+  function loadAll() {
+    PG = normProgress(store.get(K.pg));
+    ST = normState(store.get(K.st));
+    SS = normStats(store.get(K.ss));
+    EXTRA = store.get(K.ex) || [];
+    if (!Array.isArray(EXTRA)) EXTRA = [];
+    SESS = store.get(K.qs) || null;
+    var mrd = store.get(K.mr);
+    MREAD = (mrd && typeof mrd === 'object' && mrd.ids && typeof mrd.ids === 'object') ? mrd : { ids: {} };
+  }
+  function savePG() { PG.updated = nowStamp(); store.set(K.pg, PG); }
+  function saveST() { ST.updated = nowStamp(); store.set(K.st, ST); }
+  function saveSS() { SS.updated = nowStamp(); store.set(K.ss, SS); }
+  function saveExtra() { store.set(K.ex, EXTRA); }
+  function saveSession() { if (SESS) store.set(K.qs, SESS); else store.del(K.qs); }
+  function saveMREAD() { store.set(K.mr, MREAD); }
+
+  /* ------------------------------------------------------------------ */
+  /* 进度模型（与 CLI / 网页版字段一一对应）                             */
+  /* ------------------------------------------------------------------ */
+  function dayRec(date) {
+    var r = PG.daily[date];
+    if (!r || typeof r !== 'object') r = {};
+    if (typeof r.new_knowledge_done !== 'boolean') r.new_knowledge_done = false;
+    if (!Array.isArray(r.reviews_done)) r.reviews_done = [];
+    r.quiz_total = num(r.quiz_total);
+    r.quiz_correct = num(r.quiz_correct);
+    PG.daily[date] = r;
+    return r;
+  }
+  function reviewTag(trainDate, mark) { return trainDate + '|' + mark; }
+  function isReviewDone(trainDate, mark) {
+    return PG.completed_reviews.indexOf(reviewTag(trainDate, mark)) !== -1;
+  }
+  function markReviewDone(trainDate, mark, value) {
+    var tag = reviewTag(trainDate, mark);
+    var i = PG.completed_reviews.indexOf(tag);
+    var rec = dayRec(todayISO());
+    if (value) {
+      if (i === -1) PG.completed_reviews.push(tag);
+      if (rec.reviews_done.indexOf(tag) === -1) rec.reviews_done.push(tag);
+    } else {
+      if (i !== -1) PG.completed_reviews.splice(i, 1);
+      var j = rec.reviews_done.indexOf(tag);
+      if (j !== -1) rec.reviews_done.splice(j, 1);
+    }
+    savePG();
+  }
+  function setNewDone(date, value) {
+    dayRec(date).new_knowledge_done = !!value;
+    savePG();
+  }
+  function checkin(date) {
+    if (PG.checkin_dates.indexOf(date) === -1) {
+      PG.checkin_dates.push(date);
+      PG.checkin_dates.sort();
+      savePG();
+    }
+  }
+  function streak(baseDate) {
+    baseDate = baseDate || todayISO();
+    var set = {};
+    PG.checkin_dates.forEach(function (d) { set[d] = 1; });
+    var cur = baseDate, n = 0;
+    while (set[cur]) { n++; cur = addDays(cur, -1); }
+    return n;
+  }
+  function addQuiz(date, total, correct) {
+    var rec = dayRec(date);
+    rec.quiz_total = num(rec.quiz_total) + total;
+    rec.quiz_correct = num(rec.quiz_correct) + correct;
+    savePG();
+  }
+
+  /* 统计（与 Stats.record 对齐） */
+  function statsRecord(front, evaluation, date) {
+    SS.total_answers = num(SS.total_answers) + 1;
+    if (evaluation === EVAL_REMEMBER) SS.correct = num(SS.correct) + 1;
+    else SS.wrong = num(SS.wrong) + 1;
+    SS.by_eval[evaluation] = num(SS.by_eval[evaluation]) + 1;
+    var dd = SS.daily[date] || { total: 0, correct: 0 };
+    dd.total = num(dd.total) + 1;
+    if (evaluation === EVAL_REMEMBER) dd.correct = num(dd.correct) + 1;
+    SS.daily[date] = dd;
+    if (evaluation === EVAL_FORGET) SS.forget_counter[front] = num(SS.forget_counter[front]) + 1;
+    if (evaluation === EVAL_VAGUE) SS.vague_counter[front] = num(SS.vague_counter[front]) + 1;
+    SS.history.push({ date: date, front: front, eval: evaluation });
+    if (SS.history.length > 1000) SS.history = SS.history.slice(-1000);
+    saveSS();
+  }
+  function accuracyOf(days) {
+    if (!days) {
+      var t = num(SS.total_answers), c = num(SS.correct);
+      return { correct: c, total: t, pct: t ? c * 100 / t : 0 };
+    }
+    var cor = 0, tot = 0, base = todayISO();
+    for (var i = 0; i < days; i++) {
+      var dd = SS.daily[addDays(base, -i)] || {};
+      cor += num(dd.correct); tot += num(dd.total);
+    }
+    return { correct: cor, total: tot, pct: tot ? cor * 100 / tot : 0 };
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* 计划与卡片                                                         */
+  /* ------------------------------------------------------------------ */
+  var BY_DATE = {};
+  PLAN.forEach(function (r) { BY_DATE[r[COL.date]] = r; });
+  var PLAN_START = PLAN.length ? PLAN[0][COL.date] : todayISO();
+  var PLAN_END = PLAN.length ? PLAN[PLAN.length - 1][COL.date] : todayISO();
+
+  function rowFor(date) { return BY_DATE[date] || null; }
+
+  function dueFor(date) {
+    var due = [], overdue = [];
+    PLAN.forEach(function (r) {
+      MARKS.forEach(function (mk) {
+        var raw = (r[MARKIDX[mk]] || '').trim();
+        if (!raw || raw === '-') return;
+        if (raw === date) {
+          due.push({ mark: mk, reviewDate: raw, trainDate: r[COL.date], module: r[COL.module], kn: r[COL.kn], chap: r[COL.chap] });
+        } else if (raw < date) {
+          if (!isReviewDone(r[COL.date], mk)) {
+            overdue.push({ mark: mk, reviewDate: raw, trainDate: r[COL.date], module: r[COL.module], kn: r[COL.kn], chap: r[COL.chap], late: diffDays(date, raw) });
+          }
+        }
+      });
+    });
+    due.sort(function (a, b) { return a.trainDate < b.trainDate ? -1 : a.trainDate > b.trainDate ? 1 : MARKS.indexOf(a.mark) - MARKS.indexOf(b.mark); });
+    overdue.sort(function (a, b) { return b.late - a.late || (a.trainDate < b.trainDate ? -1 : 1); });
+    return { due: due, overdue: overdue };
+  }
+
+  function allCards() {
+    var out = BASE_CARDS.map(function (c) { return { front: c.f, back: c.b, tags: c.t, chapter: c.c, src: 'builtin' }; });
+    EXTRA.forEach(function (c) { out.push({ front: c.front, back: c.back, tags: c.tags || '', chapter: c.chapter || '', src: 'local' }); });
+    return out;
+  }
+  function cardByKey(key) {
+    var arr = allCards();
+    for (var i = 0; i < arr.length; i++) if (cardKey(arr[i].front) === key) return arr[i];
+    return null;
+  }
+  function cardStateOf(card) {
+    var k = cardKey(card.front);
+    var s = ST.cards[k];
+    if (!s) {
+      s = { front: card.front, interval_index: 0, reps: 0, lapses: 0, due: todayISO(), last_eval: '', last_review: '', history: [] };
+      ST.cards[k] = s;
+      saveST();
+    }
+    return s;
+  }
+
+  /* 调度：与 CLI apply_eval 一致的间隔索引推进 */
+  function applyEval(card, evaluation, date) {
+    var s = cardStateOf(card);
+    var idx = num(s.interval_index);
+    if (evaluation === EVAL_REMEMBER) {
+      idx = Math.min(idx + 1, INTERVALS.length - 1);
+      s.due = addDays(date, INTERVALS[idx]);
+    } else if (evaluation === EVAL_VAGUE) {
+      idx = Math.max(idx - 1, 0);
+      s.due = addDays(date, 1);
+    } else {
+      idx = 0;
+      s.lapses = num(s.lapses) + 1;
+      s.due = date;
+    }
+    s.interval_index = idx;
+    s.reps = num(s.reps) + 1;
+    s.last_eval = evaluation;
+    s.last_review = date;
+    s.front = card.front;
+    s.history.push({ date: date, eval: evaluation });
+    if (s.history.length > 50) s.history = s.history.slice(-50);
+    saveST();
+    statsRecord(card.front, evaluation, date);
+    return s;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* UI 基础设施                                                        */
+  /* ------------------------------------------------------------------ */
+  var toastEl, toastTimer;
+  function toast(msg) {
+    if (!toastEl) toastEl = document.getElementById('toast');
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2000);
+  }
+  function openSheet(html) {
+    var sheet = document.getElementById('sheet');
+    document.getElementById('sheetPanel').innerHTML = html;
+    sheet.classList.add('show');
+  }
+  function closeSheet() { document.getElementById('sheet').classList.remove('show'); }
+
+  var CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+
+  /* ------------------------------------------------------------------ */
+  /* 今日任务视图                                                       */
+  /* ------------------------------------------------------------------ */
+  /* 默认打开日期：计划开始前预览第 1 天，计划结束后停在最后一天 */
+  function defaultViewDate() {
+    var t = todayISO();
+    if (t < PLAN_START) return PLAN_START;
+    if (t > PLAN_END) return PLAN_END;
+    return t;
+  }
+  var viewDate = defaultViewDate();
+
+  function taskItems(text) {
+    var raw = String(text || '').trim();
+    if (!raw) return [];
+    var parts = raw.split(/[；;]+/).map(function (s) { return s.replace(/^[①②③④⑤⑥⑦⑧⑨⑩\s]+/, '').trim(); });
+    parts = parts.filter(function (s) { return s; });
+    return parts.length ? parts : [raw];
+  }
+
+  function renderToday() {
+    var box = document.getElementById('todayBody');
+    var date = viewDate;
+    var row = rowFor(date);
+    var dr = dayRec(date);
+    var dq = dueFor(date);
+    var html = '';
+
+    html += '<div class="datebar">' +
+      '<button class="icon-btn" data-act="prev-day" aria-label="前一天">‹</button>' +
+      '<div class="day"><div class="d1">' + esc(date) + ' ' + esc(weekdayCN(date)) + '</div>' +
+      '<div class="d2">' + (row ? '计划第 ' + esc(row[COL.n]) + ' 天 · ' + esc(row[COL.type]) : '不在计划范围内') + '</div></div>' +
+      '<button class="icon-btn" data-act="next-day" aria-label="后一天">›</button>' +
+      '</div>' +
+      '<div class="form-row"><input class="input" type="date" id="datePick" value="' + esc(date) + '" min="' + esc(PLAN_START) + '" max="' + esc(PLAN_END) + '"></div>';
+
+    /* 计划开始前的预习提示 */
+    if (todayISO() < PLAN_START) {
+      html += '<div class="card tight" style="border-left:3px solid var(--accent)">' +
+        '<div class="k-title" style="font-size:15px;margin:0">计划尚未开始，当前为预习预览</div>' +
+        '<div style="color:var(--muted);font-size:13px;line-height:1.7;margin-top:6px">计划自 ' + esc(PLAN_START) + ' 开始，今天先看第 1 天内容，可提前预习并标记完成。</div>' +
+        '</div>';
+    }
+    if (!row) {
+      html += '<div class="card"><div class="empty"><div class="big">—</div>该日期不在 123 天计划范围内<br>' +
+        '计划区间：' + esc(PLAN_START) + ' 至 ' + esc(PLAN_END) +
+        '<div class="btn-row" style="margin-top:14px"><button class="btn ghost" data-act="jump-today">回到今天</button></div></div></div>';
+      box.innerHTML = html;
+      bindDateInput();
+      return;
+    }
+
+    /* 知识点卡 */
+    html += '<div class="card">' +
+      '<div class="k-meta">' +
+      '<span class="chip">' + esc(row[COL.module]) + '</span>' +
+      '<span class="chip plain">' + esc(row[COL.type]) + '</span>' +
+      (row[COL.prio] ? '<span class="chip warn">' + esc(row[COL.prio]) + '</span>' : '') +
+      '</div>' +
+      '<div class="k-title">' + esc(row[COL.kn]) + '</div>' +
+      fieldHtml('教材章节', row[COL.chap]) +
+      fieldHtml('学习目标', row[COL.goal]) +
+      fieldHtml('必掌握判别要点', row[COL.key]) +
+      taskHtml(row[COL.task]) +
+      '</div>';
+
+    /* 本日学习材料入口 */
+    html += materialEntryHtml(date);
+
+    /* 今日学习完成 */
+    html += '<div class="card tight">' +
+      '<div class="check-row ' + (dr.new_knowledge_done ? 'done' : '') + '" data-act="toggle-new">' +
+      '<div class="box">' + CHECK_SVG + '</div><div class="body">' +
+      '<div class="t1">今日新知识点已完成</div>' +
+      '<div class="t2">打勾后计入「计划进度」与「连续打卡」</div>' +
+      '</div></div></div>';
+
+    /* 今日到期复习 */
+    html += '<div class="card"><div class="card-head"><h2>今日到期复习</h2>' +
+      '<span class="count">' + dq.due.length + ' 项</span><span class="grow"></span>' +
+      (dq.due.length ? '<span class="chip ' + (dq.due.every(function (x) { return isReviewDone(x.trainDate, x.mark); }) ? 'ok' : 'plain') + '">' +
+        dq.due.filter(function (x) { return isReviewDone(x.trainDate, x.mark); }).length + '/' + dq.due.length + '</span>' : '') +
+      '</div>';
+    if (!dq.due.length) {
+      html += '<div class="empty">今天没有 D1/D3/D7/D14/D30 到期项</div>';
+    } else {
+      dq.due.forEach(function (it) {
+        var done = isReviewDone(it.trainDate, it.mark);
+        html += '<div class="check-row ' + (done ? 'done' : '') + '" data-act="toggle-review" data-td="' + esc(it.trainDate) + '" data-mk="' + esc(it.mark) + '">' +
+          '<div class="box">' + CHECK_SVG + '</div><div class="body">' +
+          '<div class="t1"><span class="chip" style="margin-right:6px">' + esc(it.mark) + '</span>' + esc(it.kn) + '</div>' +
+          '<div class="t2">原学习日 ' + esc(it.trainDate) + ' · ' + esc(it.chap) + '</div>' +
+          '</div></div>';
+      });
+    }
+    html += '</div>';
+
+    /* 逾期项 */
+    html += '<div class="card"><div class="card-head"><h2>逾期未完成</h2><span class="count">' + dq.overdue.length + ' 项</span></div>';
+    if (!dq.overdue.length) {
+      html += '<div class="empty">没有逾期项，节奏保持得不错</div>';
+    } else {
+      var show = dq.overdue.slice(0, 15);
+      show.forEach(function (it) {
+        html += '<div class="check-row" data-act="toggle-review" data-td="' + esc(it.trainDate) + '" data-mk="' + esc(it.mark) + '">' +
+          '<div class="box">' + CHECK_SVG + '</div><div class="body">' +
+          '<div class="t1"><span class="chip danger" style="margin-right:6px">' + esc(it.mark) + '</span>' + esc(it.kn) + '</div>' +
+          '<div class="t2">复习日 ' + esc(it.reviewDate) + ' · 逾期 ' + it.late + ' 天</div>' +
+          '</div></div>';
+      });
+      if (dq.overdue.length > 15) {
+        html += '<div class="hint">仅显示最近 15 项逾期，共 ' + dq.overdue.length + ' 项；勾掉前面的会自动补位。</div>';
+      }
+    }
+    html += '</div>';
+
+    /* 快捷操作 */
+    html += '<div class="btn-row" style="margin-bottom:16px">' +
+      '<button class="btn primary" data-act="done-all">一键完成今日全部</button>' +
+      '<button class="btn ghost" data-act="go-quiz">去答题</button>' +
+      '</div>';
+
+    box.innerHTML = html;
+    bindDateInput();
+  }
+
+  function fieldHtml(label, value) {
+    var v = String(value || '').trim();
+    if (!v) return '';
+    return '<div class="field"><div class="label">' + esc(label) + '</div><div class="value">' + esc(v) + '</div></div>';
+  }
+  function taskHtml(text) {
+    var items = taskItems(text);
+    if (!items.length) return '';
+    var lis = items.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('');
+    return '<div class="field"><div class="label">练习任务</div><ul class="task-list">' + lis + '</ul></div>';
+  }
+  function bindDateInput() {
+    var el = document.getElementById('datePick');
+    if (el) el.addEventListener('change', function () { viewDate = this.value || todayISO(); renderToday(); });
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* 学习材料与阅读层                                                   */
+  /* ------------------------------------------------------------------ */
+  function materialForDate(date) { return MATERIAL_BY_DATE[date] || null; }
+  function materialById(id) { return MATERIAL_BY_ID[id] || null; }
+  function isMaterialRead(id) { return !!(MREAD.ids && MREAD.ids[id]); }
+  function materialReadCount() {
+    var n = 0;
+    MATERIALS.forEach(function (m) { if (isMaterialRead(m.id)) n++; });
+    return n;
+  }
+  function materialMinutes(m) {
+    var chars = String(m.pos || '').length;
+    (m.body || []).forEach(function (s) { chars += String(s.h || '').length + String(s.t || '').length; });
+    (m.keys || []).forEach(function (x) { chars += String(x).length; });
+    (m.traps || []).forEach(function (x) { chars += String(x).length; });
+    (m.quiz || []).forEach(function (q) { chars += String(q.q || '').length + String(q.a || '').length; });
+    return Math.max(3, Math.min(20, Math.round(chars / 380)));
+  }
+  function materialSearchText(m) {
+    var parts = [m.id, m.date, m.module, m.title, m.chapter, m.pos, m.prio];
+    (m.body || []).forEach(function (s) { parts.push(s.h, s.t); });
+    (m.keys || []).forEach(function (x) { parts.push(x); });
+    (m.traps || []).forEach(function (x) { parts.push(x); });
+    (m.quiz || []).forEach(function (q) { parts.push(q.q, q.a); });
+    (m.src || []).forEach(function (x) { parts.push(x); });
+    return parts.join('\n');
+  }
+  function filteredMaterials() {
+    var q = String(MQ.q || '').replace(/\s+/g, '').toLowerCase();
+    var arr = MATERIAL_ORDER.slice().sort(function (a, b) { return String(b.date).localeCompare(String(a.date)); });
+    return arr.filter(function (m) {
+      if (MQ.filter === 'read' && !isMaterialRead(m.id)) return false;
+      if (MQ.filter === 'unread' && isMaterialRead(m.id)) return false;
+      if (!q) return true;
+      return materialSearchText(m).replace(/\s+/g, '').toLowerCase().indexOf(q) !== -1;
+    });
+  }
+  function materialEntryHtml(date) {
+    var m = materialForDate(date);
+    var read = m ? isMaterialRead(m.id) : false;
+    if (m) {
+      return '<div class="card material-entry">' +
+        '<div class="me-top"><span class="me-badge">本日学习材料</span>' +
+        '<span class="chip plain">' + esc(m.module) + '</span>' +
+        (read ? '<span class="chip ok">已读</span>' : '<span class="chip">未读</span>') + '</div>' +
+        '<div class="me-title">' + esc(m.title) + '</div>' +
+        '<div class="me-sub">' + esc(m.pos) + '</div>' +
+        '<button class="btn primary block" data-act="open-material" data-id="' + esc(m.id) + '" data-from="today">' +
+        (read ? '继续阅读本日材料' : '打开本日学习材料') + ' · 约 ' + materialMinutes(m) + ' 分钟</button>' +
+        '</div>';
+    }
+    var row = rowFor(date);
+    var tp = row ? String(row[COL.type] || '') : '';
+    if (tp.indexOf('复盘') !== -1 || tp.indexOf('模考') !== -1) {
+      return '<div class="card"><div class="notice" style="margin:0 0 10px">' +
+        '<div><b>本日无新增材料，建议复习已读材料</b><br>已读 ' + materialReadCount() + ' / ' + MATERIALS.length + ' 篇</div></div>' +
+        '<button class="btn ghost block" data-act="go-materials">查看材料库</button></div>';
+    }
+    return '';
+  }
+  function renderMaterials() {
+    var box = document.getElementById('matBody');
+    if (!box) return;
+    var read = materialReadCount();
+    var chips = [['all', '全部'], ['unread', '未读'], ['read', '已读']].map(function (x) {
+      return '<button class="chip' + (MQ.filter === x[0] ? ' active' : '') + '" data-act="m-filter" data-filter="' + x[0] + '">' + x[1] + '</button>';
+    }).join('');
+    box.innerHTML = '<div class="card">' +
+      '<div class="card-head"><h2>学习材料</h2><span class="count">' + read + ' / ' + MATERIALS.length + ' 已读</span></div>' +
+      '<div class="hint" style="margin:0 0 10px">按日期编排的教材精读材料；可按知识点、模块或正文关键词检索。</div>' +
+      '<input class="input" id="mSearch" type="search" value="' + esc(MQ.q) + '" placeholder="搜索知识点 / 模块 / 正文关键词" autocomplete="off" aria-label="搜索学习材料">' +
+      '<div class="m-chips">' + chips + '</div></div>' +
+      '<div id="mList"></div>';
+    renderMaterialList();
+  }
+  function renderMaterialList() {
+    var box = document.getElementById('mList');
+    if (!box) return;
+    var list = filteredMaterials();
+    if (!list.length) {
+      box.innerHTML = '<div class="card"><div class="empty"><div class="big">—</div>没有匹配的材料<br>换个关键词，或切换上方筛选</div></div>';
+      return;
+    }
+    var html = '';
+    list.forEach(function (m) {
+      var read = isMaterialRead(m.id);
+      html += '<article class="m-item' + (read ? ' read' : '') + '" data-act="open-material" data-id="' + esc(m.id) + '" data-from="list" role="button" tabindex="0">' +
+        '<div class="m-row"><span class="m-date">' + esc(m.date) + ' ' + esc(weekdayCN(m.date)) + '</span>' +
+        '<span class="chip plain">' + esc(m.module) + '</span>' +
+        (read ? '<span class="chip ok">已读</span>' : '<span class="chip">未读</span>') + '</div>' +
+        '<div class="m-title">' + esc(m.title) + '</div>' +
+        '<div class="m-sub">' + esc(m.chapter) + ' · 约 ' + materialMinutes(m) + ' 分钟</div>' +
+        '</article>';
+    });
+    box.innerHTML = html;
+  }
+  function openMaterial(id, from) {
+    var m = materialById(id);
+    if (!m) { toast('未找到该材料'); return; }
+    var list;
+    if (from === 'today') {
+      list = MATERIAL_ORDER.slice();
+    } else {
+      list = filteredMaterials();
+      var hit = list.some(function (x) { return x.id === id; });
+      if (!hit) list = MATERIAL_ORDER.slice();
+    }
+    READER.list = list.map(function (x) { return x.id; });
+    READER.id = id;
+    READER.from = from === 'today' ? 'today' : 'list';
+    var reader = document.getElementById('reader');
+    if (reader) {
+      reader.classList.add('show');
+      reader.setAttribute('aria-hidden', 'false');
+    }
+    document.body.classList.add('reader-open');
+    renderMaterialReader();
+    var sc = document.getElementById('readerScroll');
+    if (sc) sc.scrollTop = 0;
+  }
+  function closeMaterial() {
+    var reader = document.getElementById('reader');
+    if (reader) {
+      reader.classList.remove('show');
+      reader.setAttribute('aria-hidden', 'true');
+    }
+    document.body.classList.remove('reader-open');
+    READER.id = null;
+    if (currentTab === 'materials') renderMaterialList();
+    if (currentTab === 'today') renderToday();
+  }
+  function renderMaterialReader() {
+    var m = materialById(READER.id);
+    if (!m) return;
+    var read = isMaterialRead(m.id);
+    var idx = READER.list.indexOf(m.id);
+    var head = document.getElementById('readerHead');
+    var body = document.getElementById('readerBody');
+    var foot = document.getElementById('readerFoot');
+    if (!head || !body || !foot) return;
+    head.innerHTML = '<div class="r-h-row"><span class="chip">' + esc(m.module) + '</span>' +
+      '<span class="chip plain">' + esc(m.date) + ' ' + esc(weekdayCN(m.date)) + '</span>' +
+      '<span class="grow" style="flex:1"></span>' +
+      '<button class="icon-btn" data-act="close-material" aria-label="关闭阅读层">×</button></div>' +
+      '<div class="r-h-title">' + esc(m.title) + '</div>' +
+      '<div class="r-h-sub">' + esc(m.chapter) + ' · 第 ' + (idx + 1) + ' / ' + READER.list.length + ' 篇</div>';
+    var html = '<div class="reader-quote"><div class="r-label">定位句</div><p>' + esc(m.pos) + '</p></div>';
+    (m.body || []).forEach(function (s) {
+      html += '<section class="r-sec"><h3>' + esc(s.h) + '</h3><p>' + esc(s.t) + '</p></section>';
+    });
+    html += '<section class="r-sec"><h3>必记要点</h3><ol class="r-list">' +
+      (m.keys || []).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ol></section>';
+    html += '<section class="r-sec"><h3>易错点</h3><ul class="r-list warn">' +
+      (m.traps || []).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></section>';
+    html += '<section class="r-sec"><h3>自测题<span class="r-sec-sub">答案默认折叠，点击题目展开</span></h3>' +
+      (m.quiz || []).map(function (q, i) {
+        return '<details class="r-quiz"><summary><span class="q-no">Q' + (i + 1) + '</span>' +
+          '<span class="q-text">' + esc(q.q) + '</span><span class="q-tip">看答案</span></summary>' +
+          '<div class="r-ans"><b>答案</b>' + esc(q.a) + '</div></details>';
+      }).join('') + '</section>';
+    html += '<section class="r-sec"><h3>出处</h3><ul class="r-src">' +
+      (m.src || []).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></section>';
+    body.innerHTML = html;
+    foot.innerHTML = '<div class="rf-row">' +
+      '<button class="btn ghost" data-act="reader-prev"' + (idx > 0 ? '' : ' disabled') + '>上一篇</button>' +
+      '<button class="btn ghost" data-act="reader-next"' + (idx < READER.list.length - 1 ? '' : ' disabled') + '>下一篇</button></div>' +
+      '<div class="rf-row">' +
+      '<button class="btn ' + (read ? 'ghost' : 'primary') + '" data-act="toggle-material-read" data-id="' + esc(m.id) + '">' +
+      (read ? '已读 · 点此取消' : '标记已读') + '</button>' +
+      '<button class="btn ghost" data-act="close-material">关闭</button></div>';
+  }
+  function readerStep(dir) {
+    var idx = READER.list.indexOf(READER.id);
+    var next = idx + dir;
+    if (idx < 0 || next < 0 || next >= READER.list.length) { toast(dir < 0 ? '已经是第一篇' : '已经是最后一篇'); return; }
+    READER.id = READER.list[next];
+    renderMaterialReader();
+    var sc = document.getElementById('readerScroll');
+    if (sc) sc.scrollTop = 0;
+  }
+  function toggleMaterialRead(id, value) {
+    if (!materialById(id)) return;
+    if (value === undefined) value = !isMaterialRead(id);
+    if (value) MREAD.ids[id] = nowStamp();
+    else delete MREAD.ids[id];
+    saveMREAD();
+    if (READER.id === id) renderMaterialReader();
+    if (currentTab === 'materials') renderMaterialList();
+    toast(value ? '已标记为已读' : '已取消已读标记');
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* 答题视图                                                           */
+  /* ------------------------------------------------------------------ */
+  var Q = { order: [], idx: 0, ratings: {}, start: 0, total: 0, revealed: false, active: false, finished: false };
+
+  function buildQueue() {
+    var seenKey = {};
+    var cards = allCards().filter(function (c) {
+      var k = cardKey(c.front);
+      if (seenKey[k]) return false;
+      seenKey[k] = 1;
+      return true;
+    });
+    var today = todayISO();
+    var dueC = [], newC = [], restC = [];
+    cards.forEach(function (c) {
+      var s = ST.cards[cardKey(c.front)];
+      if (s && s.due && s.due <= today) dueC.push(c);
+      else if (!s) newC.push(c);
+      else restC.push(c);
+    });
+    dueC.sort(function (a, b) {
+      var x = (ST.cards[cardKey(a.front)] || {}).due || '', y = (ST.cards[cardKey(b.front)] || {}).due || '';
+      return x < y ? -1 : x > y ? 1 : 0;
+    });
+    function shuffle(arr) {
+      for (var i = arr.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = arr[i]; arr[i] = arr[j]; arr[j] = t; }
+      return arr;
+    }
+    var order = dueC.concat(shuffle(newC)).concat(shuffle(restC));
+    return { order: order.slice(0, QUIZ_SIZE), dueCount: dueC.length, newCount: newC.length };
+  }
+
+  function startQuiz() {
+    var q = buildQueue();
+    if (!q.order.length) { toast('卡片库为空，请先制卡'); return; }
+    Q = {
+      order: q.order.map(function (c) { return cardKey(c.front); }),
+      idx: 0, ratings: {}, start: Date.now(), total: q.order.length,
+      revealed: false, active: true, finished: false
+    };
+    SESS = { order: Q.order, idx: 0, ratings: {}, start: Q.start, total: Q.total };
+    saveSession();
+    renderQuiz();
+  }
+
+  function currentCard() { return Q.active && Q.idx < Q.order.length ? cardByKey(Q.order[Q.idx]) : null; }
+
+  function quizSummary() {
+    var answered = Object.keys(Q.ratings).length;
+    var good = 0;
+    Object.keys(Q.ratings).forEach(function (k) { if (Q.ratings[k] === EVAL_REMEMBER) good++; });
+    return { answered: answered, good: good, pct: answered ? good * 100 / answered : 0 };
+  }
+
+  function renderQuiz() {
+    var box = document.getElementById('quizBody');
+    if (!Q.active && !Q.finished) {
+      var q = buildQueue();
+      var acc = accuracyOf();
+      var learned = Object.keys(ST.cards).length;
+      var dueNow = allCards().filter(function (c) { var s = ST.cards[cardKey(c.front)]; return s && s.due <= todayISO(); }).length;
+      box.innerHTML =
+        '<div class="card"><div class="card-head"><h2>开始一轮答题</h2></div>' +
+        '<div class="field"><div class="label">本轮到期待复习</div><div class="value mono">' + dueNow + ' 张</div></div>' +
+        '<div class="field"><div class="label">尚未学习的新卡</div><div class="value mono">' + q.newCount + ' 张</div></div>' +
+        '<div class="field"><div class="label">卡片总数 / 已进入记忆调度</div><div class="value mono">' + allCards().length + ' 张 / ' + learned + ' 张</div></div>' +
+        '<div class="field"><div class="label">累计正确率</div><div class="value mono">' + (acc.total ? acc.pct.toFixed(1) + '%（' + acc.correct + '/' + acc.total + '）' : '暂无记录') + '</div></div>' +
+        '<div style="margin-top:14px"><button class="btn primary block" data-act="start-quiz">开始答题（最多 ' + QUIZ_SIZE + ' 张）</button></div>' +
+        '<div class="hint">自评规则与电脑端一致：记住 → 间隔推进；模糊 → 明天重现；忘记 → 当天重现。</div></div>';
+      return;
+    }
+    if (Q.finished) {
+      var s = quizSummary();
+      var totalAcc = accuracyOf();
+      var cost = Math.max(1, Math.round((Date.now() - Q.start) / 1000));
+      var mins = Math.floor(cost / 60), secs = cost % 60;
+      box.innerHTML =
+        '<div class="card"><div class="card-head"><h2>本场小结</h2></div>' +
+        '<div class="tiles" style="margin-bottom:10px">' +
+        '<div class="tile"><div class="k">本场正确率</div><div class="v">' + s.pct.toFixed(0) + '<small>%</small></div></div>' +
+        '<div class="tile"><div class="k">本场卡片数</div><div class="v">' + s.answered + '<small>张</small></div></div>' +
+        '<div class="tile"><div class="k">记住 / 模糊 / 忘记</div><div class="v" style="font-size:17px">' + countEval(EVAL_REMEMBER) + ' / ' + countEval(EVAL_VAGUE) + ' / ' + countEval(EVAL_FORGET) + '</div></div>' +
+        '<div class="tile"><div class="k">用时</div><div class="v">' + mins + '<small>分</small>' + secs + '<small>秒</small></div></div>' +
+        '</div>' +
+        '<div class="field"><div class="label">累计正确率（全部历史）</div><div class="value mono">' +
+        (totalAcc.total ? totalAcc.pct.toFixed(1) + '%（' + totalAcc.correct + '/' + totalAcc.total + '）' : '暂无记录') + '</div></div>' +
+        '<div class="btn-row" style="margin-top:14px">' +
+        '<button class="btn primary" data-act="start-quiz">再来一轮</button>' +
+        '<button class="btn ghost" data-act="go-today">回今日任务</button></div></div>';
+      return;
+    }
+    var card = currentCard();
+    if (!card) { Q.active = false; renderQuiz(); return; }
+    var s2 = quizSummary();
+    var pct = Q.total ? Math.min(100, (Q.idx / Q.total) * 100) : 0;
+    var html = '<div class="card tight">' +
+      '<div class="quiz-stats"><span>已答 <b>' + s2.answered + '</b> / 共 ' + Q.total + '</span>' +
+      '<span>正确率 <b>' + s2.pct.toFixed(0) + '%</b></span>' +
+      '<span style="margin-left:auto">第 ' + Math.min(Q.idx + 1, Q.total) + ' 张</span></div>' +
+      '<div class="quiz-progress"><i style="width:' + pct.toFixed(1) + '%"></i></div></div>';
+
+    html += '<div class="flashcard">' +
+      '<div class="fc-label">问题（正面）</div>' +
+      '<div class="fc-front">' + esc(card.front) + '</div>' +
+      (Q.revealed
+        ? '<div class="fc-back">' + esc(card.back) + '</div>' +
+          (card.chapter ? '<div class="fc-chapter">来源：' + esc(card.chapter) + '</div>' : '') +
+          (card.tags ? '<div class="fc-chapter">标签：' + esc(card.tags) + '</div>' : '')
+        : '<div class="fc-tip">先在心里回答，再点下面按钮看答案</div>') +
+      '</div>';
+
+    if (!Q.revealed) {
+      html += '<button class="btn primary block" data-act="reveal">显示答案</button>';
+    } else {
+      html += '<div class="rate-row">' +
+        '<button class="btn again" data-act="rate" data-eval="' + EVAL_FORGET + '">忘记<small>当天重现</small></button>' +
+        '<button class="btn vague" data-act="rate" data-eval="' + EVAL_VAGUE + '">模糊<small>明天再来</small></button>' +
+        '<button class="btn good" data-act="rate" data-eval="' + EVAL_REMEMBER + '">记住<small>间隔推进</small></button>' +
+        '</div>';
+    }
+    html += '<div class="hint" style="text-align:center;margin-top:10px">电脑端预览时可用：空格翻面，1 忘记 / 2 模糊 / 3 记住</div>';
+    box.innerHTML = html;
+  }
+
+  function countEval(e) {
+    var n = 0;
+    Object.keys(Q.ratings).forEach(function (k) { if (Q.ratings[k] === e) n++; });
+    return n;
+  }
+
+  function grade(evaluation) {
+    var card = currentCard();
+    if (!card || !Q.revealed) return;
+    var date = todayISO();
+    applyEval(card, evaluation, date);
+    addQuiz(date, 1, evaluation === EVAL_REMEMBER ? 1 : 0);
+    checkin(date);
+    Q.ratings[cardKey(card.front)] = evaluation;
+    if (evaluation !== EVAL_REMEMBER) Q.order.push(cardKey(card.front));
+    Q.idx++;
+    Q.revealed = false;
+    SESS = { order: Q.order, idx: Q.idx, ratings: Q.ratings, start: Q.start, total: Q.total };
+    saveSession();
+    if (Q.idx >= Q.order.length) {
+      Q.active = false; Q.finished = true; SESS = null; saveSession();
+      renderQuiz(); renderToday(); renderStats(); renderCard();
+      toast('本场完成：' + quizSummary().answered + ' 张');
+      return;
+    }
+    renderQuiz();
+    renderStats();
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* 制卡视图                                                           */
+  /* ------------------------------------------------------------------ */
+  var dupPending = null;
+
+  function renderCard() {
+    var box = document.getElementById('cardBody');
+    var row = rowFor(viewDate);
+    var cards = allCards();
+    var html = '';
+
+    html += '<div class="card tight"><div class="card-head"><h2>按今日知识点生成骨架卡</h2></div>' +
+      '<div class="hint" style="margin:0 0 12px">当前日期：' + esc(viewDate) + (row ? ' · ' + esc(row[COL.module]) : '') + '</div>' +
+      '<button class="btn ghost block" data-act="skeleton"' + (row ? '' : ' disabled') + '>用「' + (row ? esc(String(row[COL.kn]).slice(0, 14)) + (String(row[COL.kn]).length > 14 ? '…' : '') : '该日无知识点') + '」填充</button></div>';
+
+    html += '<div class="card"><div class="card-head"><h2>手动制卡</h2><span class="count">共 ' + cards.length + ' 张</span></div>' +
+      '<div class="form-row"><label>正面（问题）</label><input class="input" id="fFront" placeholder="如：【呼吸系统】CAP 的诊断标准"></div>' +
+      '<div class="form-row"><label>背面（答案）</label><textarea class="input" id="fBack" placeholder="写下必须记住的要点"></textarea></div>' +
+      '<div class="form-row"><label>标签（可选）</label><input class="input" id="fTags" placeholder="生理学精要 呼吸系统 A必掌握"></div>' +
+      '<div class="form-row"><label>来源章节（可选）</label><input class="input" id="fChap" placeholder="第二篇 第二章 第三节"></div>' +
+      '<div id="dupBox"></div>' +
+      '<button class="btn primary block" data-act="save-card">保存卡片</button>' +
+      '<div class="hint">卡片保存在本机浏览器；重复正面会被识别并提示。</div></div>';
+
+    html += '<div class="card"><div class="card-head"><h2>卡片库</h2><span class="count">最近 ' + Math.min(8, cards.length) + ' 张</span></div>';
+    if (!cards.length) {
+      html += '<div class="empty">还没有卡片</div>';
+    } else {
+      cards.slice(-8).reverse().forEach(function (c) {
+        var s = ST.cards[cardKey(c.front)];
+        var tag = s ? ('已复习 ' + num(s.reps) + ' 次 · 下次 ' + s.due) : '未学习';
+        html += '<div class="check-row" style="border-top:1px dashed var(--line)">' +
+          '<div class="body"><div class="t1" style="text-decoration:none">' + esc(c.front) + '</div>' +
+          '<div class="t2">' + esc(tag) + (c.src === 'local' ? ' · 本机新增' : '') + '</div></div></div>';
+      });
+    }
+    html += '</div>';
+    box.innerHTML = html;
+  }
+
+  function fillSkeleton() {
+    var row = rowFor(viewDate);
+    if (!row) { toast('该日没有知识点'); return; }
+    document.getElementById('fFront').value = '【' + (row[COL.module] || '') + '】' + (row[COL.kn] || '');
+    document.getElementById('fBack').value = row[COL.key] || '';
+    document.getElementById('fTags').value = ['生理学精要', row[COL.module], row[COL.prio]].filter(Boolean).join(' ');
+    document.getElementById('fChap').value = row[COL.chap] || '';
+    toast('已填充骨架卡，可修改后保存');
+  }
+
+  function saveCard(force) {
+    var front = (document.getElementById('fFront').value || '').trim();
+    var back = (document.getElementById('fBack').value || '').trim();
+    var tags = (document.getElementById('fTags').value || '').trim();
+    var chap = (document.getElementById('fChap').value || '').trim();
+    var dup = document.getElementById('dupBox');
+    if (!front) { dup.innerHTML = '<div class="notice err">正面不能为空</div>'; return; }
+    if (!back) { dup.innerHTML = '<div class="notice err">背面不能为空</div>'; return; }
+    var hit = null;
+    allCards().forEach(function (c) { if (normText(c.front) === normText(front)) hit = c; });
+    if (hit && !force) {
+      dup.innerHTML = '<div class="notice">已存在相同正面的卡片，未重复添加。' +
+        '<button class="btn ghost" style="min-height:34px;padding:0 10px;margin-left:8px;font-size:13px" data-act="force-save">仍要添加</button></div>';
+      dupPending = { front: front, back: back, tags: tags, chapter: chap };
+      return;
+    }
+    EXTRA.push({ front: front, back: back, tags: tags, chapter: chap, created: nowStamp() });
+    saveExtra();
+    dupPending = null;
+    dup.innerHTML = '<div class="notice ok">已保存：' + esc(front.slice(0, 24)) + '</div>';
+    toast('卡片已保存到本机');
+    renderCard();
+    var again = document.getElementById('dupBox');
+    if (again) again.innerHTML = '<div class="notice ok">已保存：' + esc(front.slice(0, 24)) + '</div>';
+    renderQuiz();
+    renderStats();
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* 统计视图                                                           */
+  /* ------------------------------------------------------------------ */
+  function renderStats() {
+    var box = document.getElementById('statsBody');
+    var today = todayISO();
+    var doneDays = 0;
+    Object.keys(PG.daily).forEach(function (d) { if (PG.daily[d] && PG.daily[d].new_knowledge_done) doneDays++; });
+    var planPct = PLAN.length ? doneDays * 100 / PLAN.length : 0;
+    var st = streak(today);
+    var dq = dueFor(today);
+    var dueDone = dq.due.filter(function (x) { return isReviewDone(x.trainDate, x.mark); }).length;
+    var todayPct = dq.due.length ? Math.round(dueDone * 100 / dq.due.length) : (dayRec(today).new_knowledge_done ? 100 : 0);
+    var acc7 = accuracyOf(7);
+    var accAll = accuracyOf();
+    var cards = allCards();
+    var learned = Object.keys(ST.cards).length;
+
+    var html = '<div class="tiles">' +
+      tile('计划进度', planPct.toFixed(1), '%', doneDays + '/' + PLAN.length + ' 天') +
+      tile('连续打卡', st, ' 天', '今日' + (PG.checkin_dates.indexOf(today) !== -1 ? '已' : '未') + '打卡') +
+      tile('今日完成度', todayPct, '%', dq.due.length ? (dueDone + '/' + dq.due.length + ' 项复习') : '无到期复习') +
+      tile('卡片掌握', learned, ' 张', '共 ' + cards.length + ' 张') +
+      '</div>';
+
+    html += '<div class="card"><div class="card-head"><h2>正确率</h2></div>' +
+      '<div class="field"><div class="label">近 7 天</div><div class="value mono">' +
+      (acc7.total ? acc7.pct.toFixed(1) + '%（' + acc7.correct + '/' + acc7.total + '）' : '暂无记录') + '</div></div>' +
+      '<div class="field"><div class="label">累计</div><div class="value mono">' +
+      (accAll.total ? accAll.pct.toFixed(1) + '%（' + accAll.correct + '/' + accAll.total + '）' : '暂无记录') + '</div></div>' +
+      '<div class="field"><div class="label">自评分布</div><div class="value mono">记住 ' + num(SS.by_eval[EVAL_REMEMBER]) +
+      ' · 模糊 ' + num(SS.by_eval[EVAL_VAGUE]) + ' · 忘记 ' + num(SS.by_eval[EVAL_FORGET]) + '</div></div></div>';
+
+    /* Top10 */
+    var rows = [];
+    Object.keys(SS.forget_counter).forEach(function (f) {
+      rows.push({ front: f, forget: num(SS.forget_counter[f]), vague: num(SS.vague_counter[f] || 0) });
+    });
+    Object.keys(SS.vague_counter).forEach(function (f) {
+      if (!SS.forget_counter[f]) rows.push({ front: f, forget: 0, vague: num(SS.vague_counter[f]) });
+    });
+    rows.sort(function (a, b) { return (b.forget * 2 + b.vague) - (a.forget * 2 + a.vague); });
+    html += '<div class="card"><div class="card-head"><h2>忘记 / 模糊 Top10</h2></div>';
+    if (!rows.length) {
+      html += '<div class="empty">还没有记录，答题自评后这里会列出薄弱知识点</div>';
+    } else {
+      html += '<ol class="rank">';
+      rows.slice(0, 10).forEach(function (r) {
+        html += '<li>' + esc(r.front) + '<span class="n">忘 ' + r.forget + ' · 模 ' + r.vague + '</span></li>';
+      });
+      html += '</ol>';
+    }
+    html += '</div>';
+
+    /* 热力 30 天 */
+    html += '<div class="card"><div class="card-head"><h2>近 30 天学习热力</h2></div><div class="heat">';
+    var start = addDays(today, -29);
+    for (var i = 0; i < 30; i++) {
+      var d = addDays(start, i);
+      var rec = PG.daily[d] || {};
+      var lvl = 0;
+      if (rec.new_knowledge_done) lvl++;
+      if (rec.quiz_total > 0) lvl++;
+      var revCount = (rec.reviews_done || []).length;
+      if (revCount >= 3) lvl++;
+      var cls = 'cell' + (lvl ? ' l' + Math.min(lvl, 3) : '') + (d === today ? ' today' : '');
+      html += '<div class="' + cls + '" title="' + esc(d) + '">' + (+d.slice(8, 10)) + '</div>';
+    }
+    html += '</div><div class="heat-legend"><span>少</span><i style="background:var(--surface-2)"></i>' +
+      '<i style="background:var(--accent-soft)"></i><i style="background:var(--accent-line)"></i>' +
+      '<i style="background:var(--accent)"></i><span>多</span>' +
+      '<span style="margin-left:auto">打卡 ' + PG.checkin_dates.length + ' 天</span></div></div>';
+
+    /* 数据管理 */
+    html += '<div class="card"><div class="card-head"><h2>数据管理</h2></div>' +
+      '<div class="hint" style="margin:0 0 12px">所有数据存于本机浏览器，不上传任何服务器。换手机/清理浏览器前请先导出备份。</div>' +
+      '<div class="btn-row" style="margin-bottom:10px">' +
+      '<button class="btn primary" data-act="export">导出进度 JSON</button>' +
+      '<button class="btn ghost" data-act="import">导入进度 JSON</button></div>' +
+      '<div class="btn-row">' +
+      '<button class="btn ghost" data-act="show-json">查看 JSON 文本</button>' +
+      '<button class="btn ghost" data-act="clear">清空本机数据</button></div>' +
+      '<input type="file" id="fileImport" accept=".json,application/json" style="display:none">' +
+      '<div class="hint">导入采用「并集 + 取较大值」合并，多次导入不会重复累加。</div></div>';
+
+    html += '<div class="footer-note">生理学每日学习助手 · 移动离线版 v' + APP_VER +
+      '<br>数据源：123 天知识点计划（' + esc(PLAN_START) + ' 起）· ' + BASE_CARDS.length + ' 张初始卡片' +
+      '<br>学习材料 ' + MATERIALS.length + ' 篇 · 生成时间：' + esc(DATA.generated || '') + '</div>';
+
+    box.innerHTML = html;
+    var fi = document.getElementById('fileImport');
+    if (fi) fi.addEventListener('change', onImportFile);
+  }
+
+  function tile(k, v, unit, sub) {
+    return '<div class="tile"><div class="k">' + esc(k) + '</div><div class="v">' + esc(v) +
+      '<small>' + esc(unit) + '</small></div><div class="hint" style="margin-top:2px">' + esc(sub) + '</div></div>';
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* 导入导出                                                           */
+  /* ------------------------------------------------------------------ */
+  function buildExport() {
+    return {
+      app: APP_ID,
+      app_name: '生理学每日学习助手（移动版）',
+      version: APP_VER,
+      exported_at: nowStamp(),
+      source: 'mobile-offline-html',
+      progress: PG,
+      card_state: ST,
+      stats: SS,
+      extra_cards: EXTRA
+    };
+  }
+
+  function downloadJSON(obj, name) {
+    try {
+      var text = JSON.stringify(obj, null, 1);
+      var blob = new Blob([text], { type: 'application/json;charset=utf-8' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(url); }, 800);
+      return true;
+    } catch (e) { return false; }
+  }
+
+  function exportData() {
+    var obj = buildExport();
+    var name = '生理学每日学习助手进度_' + todayISO() + '.json';
+    var ok = downloadJSON(obj, name);
+    toast(ok ? '已导出：' + name : '当前环境不支持直接下载，已改为文本方式');
+    if (!ok) openJSONSheet(JSON.stringify(obj, null, 1));
+  }
+
+  function openJSONSheet(text) {
+    openSheet('<h3>进度 JSON（可复制保存）</h3>' +
+      '<textarea id="jsonText" readonly></textarea>' +
+      '<div class="btn-row" style="margin-top:12px">' +
+      '<button class="btn primary" data-act="copy-json">复制</button>' +
+      '<button class="btn ghost" data-act="close-sheet">关闭</button></div>');
+    var ta = document.getElementById('jsonText');
+    ta.value = text;
+    ta.addEventListener('focus', function () { this.select(); });
+  }
+
+  function mergeProgress(a, b) {
+    var out = normProgress(JSON.parse(JSON.stringify(a || {})));
+    var inc = normProgress(b || {});
+    inc.checkin_dates.forEach(function (d) { if (out.checkin_dates.indexOf(d) === -1) out.checkin_dates.push(d); });
+    out.checkin_dates.sort();
+    inc.completed_reviews.forEach(function (t) { if (out.completed_reviews.indexOf(t) === -1) out.completed_reviews.push(t); });
+    Object.keys(inc.daily).forEach(function (d) {
+      var x = out.daily[d] || {}, y = inc.daily[d] || {};
+      out.daily[d] = {
+        new_knowledge_done: !!(x.new_knowledge_done || y.new_knowledge_done),
+        reviews_done: (x.reviews_done || []).concat((y.reviews_done || []).filter(function (t) { return (x.reviews_done || []).indexOf(t) === -1; })),
+        quiz_total: Math.max(num(x.quiz_total), num(y.quiz_total)),
+        quiz_correct: Math.max(num(x.quiz_correct), num(y.quiz_correct))
+      };
+    });
+    out.updated = nowStamp();
+    return out;
+  }
+
+  function mergeState(a, b) {
+    var out = normState(JSON.parse(JSON.stringify(a || {})));
+    var inc = normState(b || {});
+    Object.keys(inc.cards).forEach(function (k) {
+      var x = out.cards[k], y = inc.cards[k];
+      if (!x) { out.cards[k] = y; return; }
+      var newer = String(y.last_review || '') > String(x.last_review || '') ||
+        (String(y.last_review || '') === String(x.last_review || '') && num(y.reps) > num(x.reps));
+      if (newer) out.cards[k] = y;
+      else if (num(y.reps) === num(x.reps) && num(y.lapses) > num(x.lapses)) { x.lapses = num(y.lapses); }
+    });
+    out.updated = nowStamp();
+    return out;
+  }
+
+  function mergeStats(a, b) {
+    var out = normStats(JSON.parse(JSON.stringify(a || {})));
+    var inc = normStats(b || {});
+    out.total_answers = Math.max(num(out.total_answers), num(inc.total_answers));
+    out.correct = Math.max(num(out.correct), num(inc.correct));
+    out.wrong = Math.max(num(out.wrong), num(inc.wrong));
+    [EVAL_REMEMBER, EVAL_VAGUE, EVAL_FORGET].forEach(function (e) {
+      out.by_eval[e] = Math.max(num(out.by_eval[e]), num(inc.by_eval[e]));
+    });
+    [['forget_counter'], ['vague_counter']].forEach(function (p) {
+      var key = p[0];
+      Object.keys(inc[key]).forEach(function (f) { out[key][f] = Math.max(num(out[key][f]), num(inc[key][f])); });
+    });
+    Object.keys(inc.daily).forEach(function (d) {
+      var x = out.daily[d] || { total: 0, correct: 0 }, y = inc.daily[d] || { total: 0, correct: 0 };
+      out.daily[d] = { total: Math.max(num(x.total), num(y.total)), correct: Math.max(num(x.correct), num(y.correct)) };
+    });
+    var seen = {};
+    out.history.forEach(function (h) { seen[h.date + '|' + h.front + '|' + h.eval] = 1; });
+    inc.history.forEach(function (h) {
+      if (!seen[h.date + '|' + h.front + '|' + h.eval]) { out.history.push(h); seen[h.date + '|' + h.front + '|' + h.eval] = 1; }
+    });
+    out.history = out.history.slice(-1000);
+    out.updated = nowStamp();
+    return out;
+  }
+
+  function importPayload(obj) {
+    if (!obj || typeof obj !== 'object') throw new Error('文件内容不是有效的 JSON 对象');
+    if (!obj.progress && !obj.card_state && !obj.stats) {
+      throw new Error('未找到 progress / card_state / stats 字段，可能不是本应用的进度文件');
+    }
+    PG = mergeProgress(PG, obj.progress || {});
+    ST = mergeState(ST, obj.card_state || {});
+    SS = mergeStats(SS, obj.stats || {});
+    if (Array.isArray(obj.extra_cards)) {
+      obj.extra_cards.forEach(function (c) {
+        if (!c || !c.front) return;
+        var exists = EXTRA.some(function (e) { return normText(e.front) === normText(c.front); });
+        if (!exists) EXTRA.push({ front: c.front, back: c.back || '', tags: c.tags || '', chapter: c.chapter || '', created: c.created || nowStamp() });
+      });
+    }
+    savePG(); saveST(); saveSS(); saveExtra();
+    refreshAll();
+  }
+
+  function onImportFile(e) {
+    var f = e.target.files && e.target.files[0];
+    if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var obj = JSON.parse(String(reader.result));
+        importPayload(obj);
+        toast('导入完成：已合并到本机数据');
+        openSheet('<h3>导入完成</h3><div class="notice ok">数据已合并（并集 + 取较大值），不会重复累加。</div>' +
+          '<div class="field"><div class="label">连续打卡</div><div class="value">' + streak(todayISO()) + ' 天</div></div>' +
+          '<div class="field"><div class="label">已完成学习天数</div><div class="value">' +
+          Object.keys(PG.daily).filter(function (d) { return PG.daily[d] && PG.daily[d].new_knowledge_done; }).length + ' 天</div></div>' +
+          '<div class="btn-row" style="margin-top:12px"><button class="btn primary" data-act="close-sheet">知道了</button></div>');
+      } catch (err) {
+        openSheet('<h3>导入失败</h3><div class="notice err">' + esc(err.message || 'JSON 解析失败') + '</div>' +
+          '<div class="btn-row" style="margin-top:12px"><button class="btn ghost" data-act="close-sheet">关闭</button></div>');
+      }
+    };
+    reader.readAsText(f, 'utf-8');
+    e.target.value = '';
+  }
+
+  function clearData() {
+    openSheet('<h3>清空本机数据</h3>' +
+      '<div class="notice err">将删除本机保存的进度、卡片调度、统计与本机新增卡片，操作不可撤销。建议先导出备份。</div>' +
+      '<div class="btn-row"><button class="btn ghost" data-act="close-sheet">取消</button>' +
+      '<button class="btn primary" data-act="clear-confirm">确认清空</button></div>');
+  }
+  function clearConfirm() {
+    [K.pg, K.st, K.ss, K.ex, K.qs, K.mark].forEach(function (k) { store.del(k); });
+    loadAll();
+    Q = { order: [], idx: 0, ratings: {}, start: 0, total: 0, revealed: false, active: false, finished: false };
+    closeSheet();
+    refreshAll();
+    toast('已清空本机数据');
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* 使用说明                                                           */
+  /* ------------------------------------------------------------------ */
+  var HELP_HTML = '<h3>使用说明</h3>' +
+    '<div class="field"><div class="label">1. 怎么在手机上打开</div><div class="value">' +
+    '把本 HTML 文件传到手机（微信「文件传输助手」、QQ、数据线、网盘均可），在手机的「文件管理」里点击该文件，选择用 Chrome / Edge / 夸克 / 三星浏览器打开。' +
+    'iOS 用「文件」App 长按 → 分享 → 用 Safari 打开。</div></div>' +
+    '<div class="field"><div class="label">2. 建议添加到主屏幕</div><div class="value">' +
+    'Chrome：右上角菜单 →「添加到主屏幕」；Safari：分享 →「添加到主屏幕」。之后可像 App 一样一键打开。</div></div>' +
+    '<div class="field"><div class="label">3. 数据存在哪</div><div class="value">' +
+    '全部存于本机浏览器本地存储（localStorage），不联网、不上传。换手机、清理浏览器数据、使用无痕模式前，请先在「统计 → 导出进度 JSON」备份。</div></div>' +
+    '<div class="field"><div class="label">4. 与电脑端互通</div><div class="value">' +
+    '电脑端网页版 data 目录下的 progress.json / card_state.json / stats.json 与导出文件字段一一对应：' +
+    'progress.json ↔ progress；card_state.json ↔ card_state；stats.json ↔ stats。' +
+    '把电脑端三个文件的内容合并成 {"progress":…,"card_state":…,"stats":…} 即可在手机上导入；反向把手机导出的 JSON 拆开对应字段写回电脑端即可。</div></div>' +
+    '<div class="field"><div class="label">5. 常见问题</div><div class="value">' +
+    '· 换个浏览器打开发现数据「消失」：不同浏览器存储互相独立，请固定用同一个浏览器。<br>' +
+    '· 点「导出」没反应：部分手机浏览器限制本地文件下载，改用「查看 JSON 文本 → 复制」保存。<br>' +
+    '· 日期不在范围内：计划表覆盖 ' + esc(PLAN_START) + ' 至 ' + esc(PLAN_END) + '，可用日期选择器回到区间内。</div></div>' +
+    '<div class="field"><div class="label">6. 浏览器兼容</div><div class="value">' +
+    '推荐 Chrome / Edge 80+、Safari 14+、夸克、UC、三星浏览器。需支持 localStorage、CSS 变量与 grid；过老的内置浏览器可能样式降级。</div></div>' +
+    '<div class="btn-row" style="margin-top:12px"><button class="btn primary" data-act="close-sheet">知道了</button></div>';
+
+  /* ------------------------------------------------------------------ */
+  /* 路由与事件                                                         */
+  /* ------------------------------------------------------------------ */
+  var TABS = ['today', 'quiz', 'card', 'stats', 'materials'];
+  var currentTab = 'today';
+
+  function switchTab(tab) {
+    if (TABS.indexOf(tab) === -1) tab = 'today';
+    currentTab = tab;
+    TABS.forEach(function (t) {
+      var v = document.getElementById('view-' + t);
+      if (v) v.classList.toggle('active', t === tab);
+      var b = document.querySelector('.tab[data-tab="' + t + '"]');
+      if (b) {
+        b.classList.toggle('active', t === tab);
+        b.setAttribute('aria-selected', t === tab ? 'true' : 'false');
+      }
+    });
+    if (tab === 'today') renderToday();
+    if (tab === 'quiz') renderQuiz();
+    if (tab === 'card') renderCard();
+    if (tab === 'stats') renderStats();
+    if (tab === 'materials') renderMaterials();
+    window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+  }
+
+  function refreshAll() {
+    renderToday(); renderQuiz(); renderCard(); renderStats(); renderMaterials();
+  }
+
+  function onAction(act, el) {
+    switch (act) {
+      case 'prev-day': viewDate = addDays(viewDate, -1); renderToday(); break;
+      case 'next-day': viewDate = addDays(viewDate, 1); renderToday(); break;
+      case 'jump-today': viewDate = defaultViewDate(); renderToday(); break;
+      case 'toggle-new': {
+        var cur = dayRec(viewDate).new_knowledge_done;
+        setNewDone(viewDate, !cur);
+        if (!cur) checkin(viewDate);
+        renderToday(); renderStats();
+        toast(!cur ? '已标记完成，并计入打卡' : '已取消完成标记');
+        break;
+      }
+      case 'toggle-review': {
+        var td = el.getAttribute('data-td'), mk = el.getAttribute('data-mk');
+        var done = isReviewDone(td, mk);
+        markReviewDone(td, mk, !done);
+        if (!done) checkin(todayISO());
+        renderToday(); renderStats();
+        toast(!done ? '复习项已完成' : '已取消该复习项');
+        break;
+      }
+      case 'done-all': {
+        setNewDone(viewDate, true);
+        var dq = dueFor(viewDate);
+        dq.due.forEach(function (it) { markReviewDone(it.trainDate, it.mark, true); });
+        checkin(viewDate);
+        renderToday(); renderStats();
+        toast('今日任务已全部完成（含 ' + dq.due.length + ' 项复习）');
+        break;
+      }
+      case 'go-quiz': switchTab('quiz'); break;
+      case 'go-materials': switchTab('materials'); break;
+      case 'open-material': openMaterial(el.getAttribute('data-id'), el.getAttribute('data-from') || 'list'); break;
+      case 'close-material': closeMaterial(); break;
+      case 'reader-prev': readerStep(-1); break;
+      case 'reader-next': readerStep(1); break;
+      case 'toggle-material-read': toggleMaterialRead(el.getAttribute('data-id')); break;
+      case 'm-filter': MQ.filter = el.getAttribute('data-filter') || 'all'; renderMaterials(); break;
+      case 'go-today': switchTab('today'); break;
+      case 'start-quiz': startQuiz(); break;
+      case 'reveal': Q.revealed = true; renderQuiz(); break;
+      case 'rate': grade(el.getAttribute('data-eval')); break;
+      case 'skeleton': fillSkeleton(); break;
+      case 'save-card': saveCard(false); break;
+      case 'force-save': if (dupPending) { saveCard(true); } break;
+      case 'export': exportData(); break;
+      case 'import': {
+        var fi = document.getElementById('fileImport');
+        if (fi) fi.click();
+        break;
+      }
+      case 'show-json': openJSONSheet(JSON.stringify(buildExport(), null, 1)); break;
+      case 'copy-json': {
+        var ta = document.getElementById('jsonText');
+        if (ta) {
+          ta.select();
+          var okc = false;
+          try { okc = document.execCommand('copy'); } catch (e) {}
+          toast(okc ? '已复制到剪贴板' : '请长按文本框手动复制');
+        }
+        break;
+      }
+      case 'clear': clearData(); break;
+      case 'clear-confirm': clearConfirm(); break;
+      case 'close-sheet': closeSheet(); break;
+      case 'help': openSheet(HELP_HTML); break;
+      default: break;
+    }
+  }
+
+  function bind() {
+    document.addEventListener('click', function (e) {
+      var t = e.target.closest ? e.target.closest('[data-act]') : null;
+      if (t) {
+        e.preventDefault();
+        onAction(t.getAttribute('data-act'), t);
+        return;
+      }
+      var tab = e.target.closest ? e.target.closest('.tab') : null;
+      if (tab) { switchTab(tab.getAttribute('data-tab')); return; }
+      if (e.target.id === 'sheet') closeSheet();
+    });
+    document.addEventListener('input', function (e) {
+      if (e.target && e.target.id === 'mSearch') {
+        MQ.q = e.target.value || '';
+        renderMaterialList();
+      }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && READER.id) { closeMaterial(); return; }
+      var tag = (e.target.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea') return;
+      if (currentTab !== 'quiz' || !Q.active) return;
+      if (e.code === 'Space') { e.preventDefault(); if (!Q.revealed) { Q.revealed = true; renderQuiz(); } }
+      if (Q.revealed && (e.key === '1' || e.key === '2' || e.key === '3')) {
+        grade(e.key === '1' ? EVAL_FORGET : e.key === '2' ? EVAL_VAGUE : EVAL_REMEMBER);
+      }
+    });
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* 自检（?selftest=1）                                                */
+  /* ------------------------------------------------------------------ */
+  function runSelfTest() {
+    var out = [];
+    function t(name, cond, info) { out.push({ name: name, pass: !!cond, info: info == null ? '' : String(info) }); }
+    var backup = {
+      pg: JSON.stringify(PG), st: JSON.stringify(ST), ss: JSON.stringify(SS),
+      ex: JSON.stringify(EXTRA), sess: store.raw(K.qs),
+      mr: JSON.stringify(MREAD), vd: viewDate
+    };
+
+    /* 1-4 数据完整性 */
+    t('计划数据条数=123', PLAN.length === 123, '实际 ' + PLAN.length);
+    var gap = 0;
+    for (var i = 1; i < PLAN.length; i++) {
+      if (addDays(PLAN[i - 1][COL.date], 1) !== PLAN[i][COL.date]) gap++;
+    }
+    t('计划日期连续无缺口', gap === 0, '缺口 ' + gap);
+    t('内嵌卡片数=102', BASE_CARDS.length === 102, '实际 ' + BASE_CARDS.length);
+    var r0 = rowFor('2026-10-21');
+    t('今日字段完整', !!r0 && !!r0[COL.module] && !!r0[COL.kn] && !!r0[COL.chap] && !!r0[COL.goal] && !!r0[COL.key] && !!r0[COL.task],
+      r0 ? (r0[COL.module] + ' / ' + r0[COL.kn]) : '未找到 2026-10-21');
+
+    /* 5 到期与逾期 */
+    var d0 = dueFor('2026-10-22');
+    t('2026-10-22 到期复习=1（第1天 D1）', d0.due.length === 1 && d0.due[0].mark === 'D1' && d0.due[0].trainDate === '2026-10-21',
+      '实际 ' + d0.due.length + (d0.due[0] ? ' / ' + d0.due[0].mark + '@' + d0.due[0].trainDate : ''));
+    t('2026-10-21 无到期项（计划首日）', dueFor('2026-10-21').due.length === 0, '实际 ' + dueFor('2026-10-21').due.length);
+    var dLater = dueFor('2026-12-31');
+    t('逾期项计算正常', dLater.overdue.length > 0 && dLater.overdue.every(function (x) { return x.late > 0; }),
+      '逾期 ' + dLater.overdue.length + ' 项');
+
+    /* 6 勾选写入 */
+    setNewDone('2026-10-21', true);
+    var reread = JSON.parse(store.raw(K.pg) || '{}');
+    t('勾选新知识点已持久化', reread.daily && reread.daily['2026-10-21'] && reread.daily['2026-10-21'].new_knowledge_done === true, '');
+    markReviewDone('2026-10-21', 'D1', true);
+    var reread2 = JSON.parse(store.raw(K.pg) || '{}');
+    t('复习勾选已写入 completed_reviews', (reread2.completed_reviews || []).indexOf('2026-10-21|D1') !== -1, '');
+
+    /* 7 重新加载（模拟刷新） */
+    var before = JSON.stringify({ p: PG.daily['2026-10-21'].new_knowledge_done, tags: PG.completed_reviews.length });
+    loadAll();
+    var after = JSON.stringify({ p: PG.daily['2026-10-21'].new_knowledge_done, tags: PG.completed_reviews.length });
+    t('刷新后本地数据不丢失', before === after, before + ' → ' + after);
+
+    /* 8 答题调度 */
+    startQuiz();
+    t('答题会话建立（≤20 张）', Q.active && Q.order.length > 0 && Q.order.length <= 20, '本场 ' + Q.order.length + ' 张');
+    var firstKey = Q.order[0];
+    Q.revealed = true;
+    var dueBefore = (ST.cards[firstKey] || {}).due;
+    grade(EVAL_REMEMBER);
+    var s1 = ST.cards[firstKey] || {};
+    t('记住 → 间隔推进且下次日期后移', num(s1.interval_index) >= 1 && s1.due > todayISO(), 'due ' + s1.due + '（原 ' + (dueBefore || '-') + '）');
+    Q.revealed = true;
+    var secondKey = Q.order[Q.idx];
+    grade(EVAL_FORGET);
+    t('忘记 → 当天重现（队列追加）', Q.order.lastIndexOf(secondKey) > Q.idx - 1, '队列长度 ' + Q.order.length);
+    Q.revealed = true;
+    grade(EVAL_VAGUE);
+    var summ = quizSummary();
+    t('正确率口径=记住/已答', summ.answered > 0 && Math.abs(summ.pct - summ.good * 100 / summ.answered) < 0.001,
+      summ.good + '/' + summ.answered + ' = ' + summ.pct.toFixed(1) + '%');
+    t('答题已记入 progress.daily', num(dayRec(todayISO()).quiz_total) >= 3, 'quiz_total=' + dayRec(todayISO()).quiz_total);
+    t('答题已记入 stats', num(SS.total_answers) >= 3, 'total_answers=' + SS.total_answers);
+
+    /* 9 制卡 */
+    var dupFront = BASE_CARDS[0].f;
+    var hit = allCards().filter(function (c) { return normText(c.front) === normText(dupFront); });
+    t('重复检测可命中', hit.length >= 1, '命中 ' + hit.length + ' 张');
+    var keyBefore = cardKey(dupFront);
+    t('卡片键与电脑端算法一致(12位md5)', keyBefore.length === 12 && /^[0-9a-f]{12}$/.test(keyBefore), keyBefore);
+    var extraBefore = EXTRA.length;
+    EXTRA.push({ front: '__selftest__ ' + Date.now(), back: 'x', tags: '', chapter: '', created: nowStamp() });
+    saveExtra();
+    t('新增卡片已持久化', (store.get(K.ex) || []).length === extraBefore + 1, '');
+    EXTRA.pop(); saveExtra();
+
+    /* 10 导入导出往返 */
+    var exp = buildExport();
+    var text = JSON.stringify(exp);
+    var back = JSON.parse(text);
+    t('导出 JSON 结构完整', !!back.progress && !!back.card_state && !!back.stats && back.app === APP_ID, 'app=' + back.app);
+    var accBefore = accuracyOf();
+    importPayload(back);
+    var accAfter = accuracyOf();
+    t('导入导出往返一致（不翻倍）', Math.abs(accBefore.pct - accAfter.pct) < 0.001 &&
+      num(accBefore.total) === num(accAfter.total), accBefore.total + ' → ' + accAfter.total);
+
+    /* 11 统计与渲染 */
+    var doneDays = Object.keys(PG.daily).filter(function (d) { return PG.daily[d] && PG.daily[d].new_knowledge_done; }).length;
+    t('计划进度口径正确', Math.abs(doneDays * 100 / PLAN.length - doneDays * 100 / 123) < 1e-9, doneDays + '/' + PLAN.length);
+    switchTab('stats');
+    var cells = document.querySelectorAll('.heat .cell');
+    t('热力图 30 格', cells.length === 30, '实际 ' + cells.length);
+
+    /* 12 布局 */
+    switchTab('today');
+    var sw = document.documentElement.scrollWidth, iw = window.innerWidth;
+    t('无横向溢出', sw <= iw + 1, 'scrollWidth=' + sw + ' innerWidth=' + iw);
+    var btn = document.querySelector('.tab');
+    var tapH = btn ? btn.getBoundingClientRect().height : 0;
+    if (!tapH) tapH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--tap')) || 0;
+    t('点击区高度≥44px', tapH >= 44, tapH ? Math.round(tapH) + 'px' : 'no tab');
+    var fsb = parseFloat(getComputedStyle(document.body).fontSize);
+    if (!fsb) fsb = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--fs-body')) || 0;
+    t('正文基准字号≥16px', fsb >= 16, fsb + 'px');
+
+
+    /* 13 学习材料 */
+    t('材料条数=15', MATERIALS.length === 15, '实际 ' + MATERIALS.length);
+    var badMat = MATERIALS.filter(function (m) {
+      return !m.id || !m.date || !m.module || !m.title || !m.pos || !m.chapter ||
+        !Array.isArray(m.body) || !m.body.length || !Array.isArray(m.keys) || !m.keys.length ||
+        !Array.isArray(m.traps) || !m.traps.length || !Array.isArray(m.quiz) || !m.quiz.length ||
+        !Array.isArray(m.src) || !m.src.length;
+    });
+    t('材料字段完整', badMat.length === 0, badMat.length ? badMat.map(function (m) { return m.id; }).join(',') : '15/15');
+    var matDates = {}, dupDate = 0;
+    MATERIALS.forEach(function (m) { if (matDates[m.date]) dupDate++; matDates[m.date] = 1; });
+    var notNew = MATERIALS.filter(function (m) { var r = rowFor(m.date); return !r || r[COL.type] !== '新知识点'; });
+    t('15 个新知识点日期全覆盖', Object.keys(matDates).length === 15 && dupDate === 0 && notNew.length === 0,
+      '日期 ' + Object.keys(matDates).length + ' / 非新知识点 ' + notNew.length);
+    MQ.q = ''; MQ.filter = 'all';
+    switchTab('materials');
+    t('材料列表渲染 15 条', document.querySelectorAll('#mList .m-item').length === 15,
+      'DOM ' + document.querySelectorAll('#mList .m-item').length);
+    var m0 = MATERIAL_ORDER[0];
+    openMaterial(m0.id, 'today');
+    t('阅读层可打开', document.getElementById('reader').classList.contains('show'), m0.id + ' ' + m0.title);
+    var rb = document.getElementById('readerBody');
+    t('阅读层六段结构完整', rb.querySelectorAll('.reader-quote').length === 1 &&
+      rb.querySelectorAll('.r-sec').length >= 4 && rb.querySelectorAll('.r-quiz').length === m0.quiz.length,
+      '定位句 ' + rb.querySelectorAll('.reader-quote').length + ' / 分节 ' + rb.querySelectorAll('.r-sec').length +
+      ' / 自测 ' + rb.querySelectorAll('.r-quiz').length);
+    var allClosed = true;
+    rb.querySelectorAll('.r-quiz').forEach(function (d) { if (d.open) allClosed = false; });
+    t('自测答案默认折叠', rb.querySelectorAll('.r-quiz').length === m0.quiz.length && allClosed,
+      'details ' + rb.querySelectorAll('.r-quiz').length);
+    var rp = rb.querySelector('.reader-quote p');
+    var rcs = getComputedStyle(rp);
+    var flh = parseFloat(rcs.lineHeight) || 0, ffs = parseFloat(rcs.fontSize) || 0;
+    if (flh && flh < 2.5) flh = flh * ffs;
+    t('阅读正文≥16px 行高≥1.7', ffs >= 16 && flh / ffs >= 1.7, ffs + 'px / ' + Math.round(flh) + 'px');
+    var rsc = document.getElementById('readerScroll');
+    t('阅读层 390px 无横向滚动', rsc.scrollWidth <= rsc.clientWidth + 1,
+      'scrollWidth=' + rsc.scrollWidth + ' clientWidth=' + rsc.clientWidth);
+    toggleMaterialRead(m0.id, true);
+    var mrBack = JSON.parse(store.raw(K.mr) || '{}');
+    t('材料已读状态已持久化', !!(mrBack.ids && mrBack.ids[m0.id]), m0.id);
+    t('材料库显示已读标记', !!document.querySelector('#mList .m-item.read'), '');
+    closeMaterial();
+    viewDate = m0.date;
+    switchTab('today');
+    t('今日页显示材料入口', !!document.querySelector('[data-act="open-material"]'), m0.date);
+    viewDate = '2026-10-26';
+    renderToday();
+    var promptText = document.getElementById('todayBody').textContent;
+    t('复盘日显示无新增材料提示', promptText.indexOf('本日无新增材料') !== -1 && promptText.indexOf('建议复习已读材料') !== -1, '');
+    closeMaterial();
+    MQ.q = ''; MQ.filter = 'all';
+
+    /* 还原现场 */
+    try {
+      PG = normProgress(JSON.parse(backup.pg));
+      ST = normState(JSON.parse(backup.st));
+      SS = normStats(JSON.parse(backup.ss));
+      EXTRA = JSON.parse(backup.ex);
+      savePG(); saveST(); saveSS(); saveExtra();
+      SESS = null; saveSession();
+      try { MREAD = backup.mr ? JSON.parse(backup.mr) : { ids: {} }; } catch (e2) { MREAD = { ids: {} }; }
+      saveMREAD();
+      MQ.q = ''; MQ.filter = 'all';
+      viewDate = backup.vd || todayISO();
+      Q = { order: [], idx: 0, ratings: {}, start: 0, total: 0, revealed: false, active: false, finished: false };
+    } catch (e) {}
+
+    var pass = out.filter(function (x) { return x.pass; }).length;
+    var pre = document.getElementById('selftest');
+    if (pre) {
+      pre.style.display = 'block';
+      pre.textContent = '[SELFTEST] ' + pass + '/' + out.length + ' 通过\n' +
+        out.map(function (x) { return (x.pass ? '[PASS] ' : '[FAIL] ') + x.name + (x.info ? ' | ' + x.info : ''); }).join('\n') +
+        '\n[END]';
+    }
+    document.title = 'SELFTEST ' + pass + '/' + out.length;
+    window.__SELFTEST__ = { pass: pass, total: out.length, items: out };
+    return out;
+  }
+
+  function runPersistCheck() {
+    var raw = store.raw(K.mark);
+    var pre = document.getElementById('selftest');
+    var ok = !!raw;
+    var info = ok ? '已读到上次写入的标记 ' + raw.slice(0, 60) : '未读到任何标记';
+    if (pre) {
+      pre.style.display = 'block';
+      pre.textContent = '[SELFTEST] ' + (ok ? '1/1' : '0/1') + ' 通过\n' +
+        (ok ? '[PASS] ' : '[FAIL] ') + '跨进程本地存储可读 | ' + info + '\n[END]';
+    }
+    document.title = 'SELFTEST-PERSIST ' + (ok ? '1/1' : '0/1');
+    window.__SELFTEST__ = { pass: ok ? 1 : 0, total: 1, items: [{ name: '跨进程本地存储可读', pass: ok, info: info }] };
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* 启动                                                               */
+  /* ------------------------------------------------------------------ */
+  function init() {
+    loadAll();
+    bind();
+    if (!storageOK) {
+      TOAST_WARN();
+    }
+    switchTab('today');
+    var q = String(location.search || '');
+    if (/selftest=persist/.test(q)) { runPersistCheck(); return; }
+    if (/selftest=1/.test(q)) { runSelfTest(); return; }
+    /* 常规启动：记录本次打卡（用于连续打卡统计） */
+    if (PLAN.length) checkin(todayISO());
+  }
+  function TOAST_WARN() {
+    setTimeout(function () {
+      toast('本浏览器禁用了本地存储，数据仅本次有效，请及时导出备份');
+    }, 600);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+
+  window.__APP__ = {
+    plan: function () { return PLAN; },
+    cards: allCards,
+    progress: function () { return PG; },
+    stats: function () { return SS; },
+    cardState: function () { return ST; },
+    dueFor: dueFor,
+    buildExport: buildExport,
+    importPayload: importPayload,
+    cardKey: cardKey,
+    materials: function () { return MATERIALS; },
+    materialRead: function () { return MREAD; },
+    openMaterial: openMaterial,
+    addDays: addDays
+  };
+})();
+
+</script>
+
+<script>
+/* PWA：注册 Service Worker，实现离线缓存（仅在 http/https 或 localhost 下生效） */
+(function () {
+  if (!('serviceWorker' in navigator)) return;
+  if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') return;
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(function (e) {
+      if (window.console && console.warn) console.warn('[PWA] Service Worker 注册失败：', e);
+    });
+  });
+})();
+</script>
+</body>
+</html>

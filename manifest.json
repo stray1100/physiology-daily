@@ -1,0 +1,43 @@
+{
+  "lang": "zh-CN",
+  "name": "生理学每日学习助手",
+  "short_name": "生理学习",
+  "description": "生理学每日学习助手 PWA 版：123 天 102 个知识点计划，今日任务、答题、制卡、统计，内置 15 篇精讲材料，界面全部缓存，断网可用。",
+  "version": "1.1.0",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "portrait",
+  "background_color": "#f4f7fc",
+  "theme_color": "#2f6fb0",
+  "categories": [
+    "education",
+    "medical",
+    "productivity"
+  ],
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
